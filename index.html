@@ -6,10 +6,8 @@
   <title>AM-SuSh — 探问智能的边界</title>
   <meta name="description" content="AM-SuSh · 在代码与思考的交汇处，触达智能的边界。AI 智能体与研究工具的构建者。" />
 
-  <!-- Favicon -->
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
-  <!-- Fonts: 衬线杂志感骨架，含中文衬线，fallback 至系统宋体 -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Noto+Serif+SC:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -18,33 +16,41 @@
 </head>
 <body>
 
-  <!-- 顶部阅读进度 -->
+  <!-- 顶部阅读进度（按页计） -->
   <div class="progress" id="progress" aria-hidden="true"></div>
 
   <!-- 刊头 / 导航 -->
   <header class="masthead" id="masthead">
-    <a href="#hero" class="mark" aria-label="AM-SuSh 首页">
+    <a href="#hero" class="mark" aria-label="AM-SuSh 首页" data-page-link="0">
       <span class="mark-mark">A<span class="mark-dot">M</span></span>
       <span class="mark-name">AM-SuSh</span>
     </a>
     <nav class="nav" aria-label="主导航">
-      <a href="#about" class="nav-link"><span class="nav-no">01</span>About</a>
-      <a href="#work" class="nav-link"><span class="nav-no">02</span>Work</a>
-      <a href="#craft" class="nav-link"><span class="nav-no">03</span>Craft</a>
-      <a href="#manifesto" class="nav-link"><span class="nav-no">04</span>Notes</a>
-      <a href="#contact" class="nav-link"><span class="nav-no">05</span>Contact</a>
+      <a href="#about"    class="nav-link" data-page-link="1"><span class="nav-no">01</span>About</a>
+      <a href="#work"     class="nav-link" data-page-link="2"><span class="nav-no">02</span>Work</a>
+      <a href="#craft"    class="nav-link" data-page-link="3"><span class="nav-no">03</span>Craft</a>
+      <a href="#manifesto" class="nav-link" data-page-link="4"><span class="nav-no">04</span>Notes</a>
+      <a href="#contact"  class="nav-link" data-page-link="5"><span class="nav-no">05</span>Contact</a>
     </nav>
   </header>
 
-  <main>
+  <!-- 分页点导航 -->
+  <nav class="dots" id="dots" aria-label="分页导航">
+    <button class="dot-btn active" data-page-link="0" aria-label="封面"><span></span></button>
+    <button class="dot-btn" data-page-link="1" aria-label="关于"><span></span></button>
+    <button class="dot-btn" data-page-link="2" aria-label="作品"><span></span></button>
+    <button class="dot-btn" data-page-link="3" aria-label="技艺"><span></span></button>
+    <button class="dot-btn" data-page-link="4" aria-label="手记"><span></span></button>
+    <button class="dot-btn" data-page-link="5" aria-label="联系"><span></span></button>
+  </nav>
 
-    <!-- ════════════ HERO ════════════ -->
-    <section class="hero" id="hero">
+  <main id="pager">
+
+    <!-- ════════════ P0 · HERO ════════════ -->
+    <section class="page hero" id="hero" data-page="0">
       <div class="hero-meta">
-        <span>Vol. 01</span>
-        <span class="dot">·</span>
-        <span>Anno 2026</span>
-        <span class="dot">·</span>
+        <span>Vol. 01</span><span class="dot">·</span>
+        <span>Anno 2026</span><span class="dot">·</span>
         <span>A Personal Journal</span>
       </div>
 
@@ -63,7 +69,7 @@
         <div class="hero-roles">
           AI Agent Builder <span class="sep">/</span> Research Tools <span class="sep">/</span> Lifelong Student
         </div>
-        <a href="#about" class="scroll-cue" aria-label="向下阅读">
+        <a href="#about" class="scroll-cue" data-page-link="1" aria-label="向下阅读">
           <span class="cue-text">Read on</span>
           <span class="cue-line"></span>
         </a>
@@ -71,8 +77,8 @@
     </section>
 
 
-    <!-- ════════════ ABOUT ════════════ -->
-    <section class="panel" id="about" data-reveal>
+    <!-- ════════════ P1 · ABOUT ════════════ -->
+    <section class="page panel" id="about" data-page="1">
       <header class="panel-head">
         <span class="panel-no">01</span>
         <span class="panel-rule"></span>
@@ -80,12 +86,12 @@
       </header>
 
       <div class="panel-body about-grid">
-        <h2 class="about-lede reveal-up">
+        <h2 class="about-lede">
           A builder at the <em>seam</em><br />
           of code &amp; thought.
         </h2>
 
-        <div class="about-text reveal-up">
+        <div class="about-text">
           <p class="dropcap-en">
             <span class="dropcap">H</span>i — I'm AM-SuSh. I build AI agents and research tools, and I'm quietly
             obsessed with one question: <em>where does machine intelligence meet human
@@ -102,176 +108,234 @@
     </section>
 
 
-    <!-- ════════════ WORK ════════════ -->
-    <section class="panel" id="work" data-reveal>
+    <!-- ════════════ P2 · WORK（分类轮换卡片 + 笔记）════════════ -->
+    <section class="page panel" id="work" data-page="2">
       <header class="panel-head">
         <span class="panel-no">02</span>
         <span class="panel-rule"></span>
         <span class="panel-label">Selected Work — 精选作品</span>
       </header>
 
-      <div class="work-list">
+      <!-- 分类切换 -->
+      <div class="work-tabs" role="tablist" aria-label="作品分类">
+        <button class="work-tab active" data-cat="ai"        role="tab" aria-selected="true">
+          <span class="tab-no">i</span>AI 研发<span class="tab-sub">Agents · RAG · Research</span>
+        </button>
+        <button class="work-tab" data-cat="tools"     role="tab" aria-selected="false">
+          <span class="tab-no">ii</span>工具<span class="tab-sub">Tools · Idea</span>
+        </button>
+        <button class="work-tab" data-cat="study"     role="tab" aria-selected="false">
+          <span class="tab-no">iii</span>研究<span class="tab-sub">Research · Paper</span>
+        </button>
+        <button class="work-tab" data-cat="notes"     role="tab" aria-selected="false">
+          <span class="tab-no">iv</span>课程笔记<span class="tab-sub">Notes · 课程</span>
+        </button>
+      </div>
 
-        <a class="work-row reveal-up" href="https://github.com/AM-SuSh/PPTAS" target="_blank" rel="noopener">
-          <span class="work-no">01</span>
-          <div class="work-main">
-            <h3 class="work-title">PPTAS <span class="work-zh">演示内容扩展智能体</span></h3>
-            <p class="work-desc">An AI agent that parses structure, retrieves semantics, and expands knowledge — turning slides into a learnable framework.</p>
-            <p class="work-desc-zh">自动解析结构 · 语义检索 · 知识扩展，把演示文稿变成可学习的知识框架。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag tag-accent">AI 研发</span>
-            <span class="tag">Agent · RAG</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+      <!-- 卡片舞台：自动 + 悬停轮换 -->
+      <div class="work-stage" id="workStage">
+        <div class="work-card" data-cat="ai" aria-live="polite">
+          <div class="card-index"><span class="cur">01</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">PPTAS</h3>
+          <p class="card-sub">演示内容扩展智能体</p>
+          <p class="card-desc">An AI agent that parses structure, retrieves semantics, and expands knowledge — turning slides into a learnable framework.</p>
+          <p class="card-desc-zh">自动解析结构 · 语义检索 · 知识扩展，把演示文稿变成可学习的知识框架。</p>
+          <ul class="card-tags"><li>Agent</li><li>RAG</li><li>Knowledge</li></ul>
+          <a class="card-link" href="https://github.com/AM-SuSh/PPTAS" target="_blank" rel="noopener">View on GitHub <span>↗</span></a>
+        </div>
 
-        <a class="work-row reveal-up" href="https://github.com/AM-SuSh/PaperLens" target="_blank" rel="noopener">
-          <span class="work-no">02</span>
-          <div class="work-main">
-            <h3 class="work-title">PaperLens <span class="work-zh">智能论文阅读平台</span></h3>
-            <p class="work-desc">An intelligent platform for reading research papers — clearer reading, deeper understanding.</p>
-            <p class="work-desc-zh">让读论文这件事，变得更清晰、更深入。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag tag-accent">AI 研发</span>
-            <span class="tag tag-warn">Testing</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="ai">
+          <div class="card-index"><span class="cur">02</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">PaperLens</h3>
+          <p class="card-sub">智能论文阅读平台</p>
+          <p class="card-desc">An intelligent platform for reading research papers — clearer reading, deeper understanding.</p>
+          <p class="card-desc-zh">让读论文这件事，变得更清晰、更深入。</p>
+          <ul class="card-tags"><li>Reading</li><li>RAG</li><li>Research</li></ul>
+          <p class="card-status">Testing · Beta 招募中</p>
+        </div>
 
-        <a class="work-row reveal-up" href="https://github.com/AM-SuSh/MiniMR" target="_blank" rel="noopener">
-          <span class="work-no">03</span>
-          <div class="work-main">
-            <h3 class="work-title">MiniMR <span class="work-zh">轻量级 MapReduce</span></h3>
-            <p class="work-desc">A lightweight, pseudo-distributed MapReduce system written in Go — engineered depth, multi-layer fault tolerance, a visual dashboard.</p>
-            <p class="work-desc-zh">基于 Go 的伪分布式 MapReduce，多重容错，多种模式测试与可视化。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag">系统</span>
-            <span class="tag">Go · Distributed</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="ai">
+          <div class="card-index"><span class="cur">03</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">smart-grid-web</h3>
+          <p class="card-sub">工程咨询报告智能生成系统</p>
+          <p class="card-desc">An AI-powered intelligent generation system for engineering consulting reports.</p>
+          <p class="card-desc-zh">AI 驱动的工程咨询报告智能生成系统。</p>
+          <ul class="card-tags"><li>Agent</li><li>Generation</li></ul>
+          <p class="card-status">Building · 构筑中</p>
+        </div>
 
-        <a class="work-row reveal-up" href="https://github.com/SSSSizn/OpenRank" target="_blank" rel="noopener">
-          <span class="work-no">04</span>
-          <div class="work-main">
-            <h3 class="work-title">PyAnalyzer <span class="work-zh">开源依赖情报</span></h3>
-            <p class="work-desc">Dependency intelligence for the Python open-source ecosystem — static checks, relationship analysis, version advisories.</p>
-            <p class="work-desc-zh">面向 Python 开源生态的依赖分析与版本决策工具，含浏览器扩展与可视化仪表盘。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag">工具</span>
-            <span class="tag">Analysis</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="ai">
+          <div class="card-index"><span class="cur">04</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">AAIC</h3>
+          <p class="card-sub">AI 伴侣与人类社交研究</p>
+          <p class="card-desc">AI-mediated Alterations in Interpersonal Contact — how AI companions reshape real-world social patterns.</p>
+          <p class="card-desc-zh">AI 伴侣对人类现实社交模式的影响研究。</p>
+          <ul class="card-tags"><li>Study</li><li>Society</li></ul>
+          <p class="card-status">Building · 构筑中</p>
+        </div>
 
-        <a class="work-row reveal-up" href="https://github.com/AM-SuSh/SoFT" target="_blank" rel="noopener">
-          <span class="work-no">05</span>
-          <div class="work-main">
-            <h3 class="work-title">SoFT <span class="work-zh">本地专注工作台</span></h3>
-            <p class="work-desc">An integrated local workspace for focused timing, task planning, and schedule management.</p>
-            <p class="work-desc-zh">整合专注计时、任务规划与日程管理的本地工作台。DDL 管理 · 任务优先级 · 本地化工作流。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag">工具</span>
-            <span class="tag">Productivity</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="tools">
+          <div class="card-index"><span class="cur">01</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">PyAnalyzer</h3>
+          <p class="card-sub">开源依赖情报</p>
+          <p class="card-desc">Dependency intelligence for the Python open-source ecosystem.</p>
+          <p class="card-desc-zh">面向 Python 开源生态的依赖分析与版本决策工具，含浏览器扩展与可视化仪表盘。</p>
+          <ul class="card-tags"><li>Analysis</li><li>Python</li><li>Deps</li></ul>
+          <a class="card-link" href="https://github.com/SSSSizn/OpenRank" target="_blank" rel="noopener">View on GitHub <span>↗</span></a>
+        </div>
 
-        <a class="work-row reveal-up" href="https://github.com/AM-SuSh/2LL" target="_blank" rel="noopener">
-          <span class="work-no">06</span>
-          <div class="work-main">
-            <h3 class="work-title">2LL <span class="work-zh">双语 Markdown 编辑器</span></h3>
-            <p class="work-desc">A dual-pane Markdown editor built for bilingual writing — synced scroll, PDF export.</p>
-            <p class="work-desc-zh">面向双语编辑的双栏 Markdown 编辑器，中英双语 · 双栏同步滚动 · PDF 导出。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag">工具</span>
-            <span class="tag">Editor</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="tools">
+          <div class="card-index"><span class="cur">02</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">SoFT</h3>
+          <p class="card-sub">本地专注工作台</p>
+          <p class="card-desc">An integrated local workspace for focused timing, task planning, and schedule management.</p>
+          <p class="card-desc-zh">整合专注计时、任务规划与日程管理的本地工作台。DDL 管理 · 任务优先级 · 本地化。</p>
+          <ul class="card-tags"><li>Productivity</li><li>Local</li></ul>
+          <a class="card-link" href="https://github.com/AM-SuSh/SoFT" target="_blank" rel="noopener">View on GitHub <span>↗</span></a>
+        </div>
 
-        <a class="work-row reveal-up is-quiet" href="https://github.com/AM-SuSh" target="_blank" rel="noopener">
-          <span class="work-no">07</span>
-          <div class="work-main">
-            <h3 class="work-title">AAIC <span class="work-zh">AI 伴侣与人类社交研究</span></h3>
-            <p class="work-desc-zh">AI 伴侣对人类现实社交模式的影响研究 —— 正在构筑中。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag tag-accent">研究</span>
-            <span class="tag tag-mute">Building</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="tools">
+          <div class="card-index"><span class="cur">03</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">2LL</h3>
+          <p class="card-sub">双语 Markdown 编辑器</p>
+          <p class="card-desc">A dual-pane Markdown editor built for bilingual writing — synced scroll, PDF export.</p>
+          <p class="card-desc-zh">面向双语编辑的双栏 Markdown 编辑器，中英双语 · 双栏同步滚动 · PDF 导出。</p>
+          <ul class="card-tags"><li>Editor</li><li>Markdown</li></ul>
+          <a class="card-link" href="https://github.com/AM-SuSh/2LL" target="_blank" rel="noopener">View on GitHub <span>↗</span></a>
+        </div>
 
-        <a class="work-row reveal-up is-quiet" href="https://github.com/AM-SuSh" target="_blank" rel="noopener">
-          <span class="work-no">08</span>
-          <div class="work-main">
-            <h3 class="work-title">smart-grid-web <span class="work-zh">工程咨询报告生成系统</span></h3>
-            <p class="work-desc-zh">AI 驱动的工程咨询报告智能生成系统 —— 正在构筑中。</p>
-          </div>
-          <div class="work-meta">
-            <span class="tag tag-accent">AI 研发</span>
-            <span class="tag tag-mute">Building</span>
-            <span class="work-arrow" aria-hidden="true">↗</span>
-          </div>
-        </a>
+        <div class="work-card" data-cat="tools">
+          <div class="card-index"><span class="cur">04</span><span class="sep">/</span><span class="tot">4</span></div>
+          <h3 class="card-title">MiniMR</h3>
+          <p class="card-sub">轻量级 MapReduce</p>
+          <p class="card-desc">A lightweight, pseudo-distributed MapReduce system written in Go.</p>
+          <p class="card-desc-zh">基于 Go 的伪分布式 MapReduce，多重容错，多种模式测试与可视化。</p>
+          <ul class="card-tags"><li>Go</li><li>Distributed</li><li>Fault-tolerance</li></ul>
+          <a class="card-link" href="https://github.com/AM-SuSh/MiniMR" target="_blank" rel="noopener">View on GitHub <span>↗</span></a>
+        </div>
 
+        <div class="work-card" data-cat="study">
+          <div class="card-index"><span class="cur">01</span><span class="sep">/</span><span class="tot">2</span></div>
+          <h3 class="card-title">AAIC</h3>
+          <p class="card-sub">AI 伴侣对人际接触的影响</p>
+          <p class="card-desc">A study on how AI companions mediate and alter real-world interpersonal contact patterns.</p>
+          <p class="card-desc-zh">探讨 AI 伴侣如何中介并改变现实世界中的人际接触模式——正在构筑。</p>
+          <ul class="card-tags"><li>HCI</li><li>Society</li></ul>
+          <p class="card-status">In Progress · 进行中</p>
+        </div>
+
+        <div class="work-card" data-cat="study">
+          <div class="card-index"><span class="cur">02</span><span class="sep">/</span><span class="tot">2</span></div>
+          <h3 class="card-title">智能体与教育的交叉</h3>
+          <p class="card-sub">Agents × Education</p>
+          <p class="card-desc">Where autonomous agents meet pedagogy — tools that teach, assist, and adapt.</p>
+          <p class="card-desc-zh">自主智能体与教学法相遇之处——能教学、能辅助、能自适应的工具。</p>
+          <ul class="card-tags"><li>Agents</li><li>Education</li></ul>
+          <p class="card-status">Reading · 文献调研中</p>
+        </div>
+
+        <div class="work-card" data-cat="notes">
+          <div class="card-index"><span class="cur">01</span><span class="sep">/</span><span class="tot">3</span></div>
+          <h3 class="card-title">操作系统 · 课内笔记</h3>
+          <p class="card-sub">Operating Systems</p>
+          <p class="card-desc-zh">进程与线程、调度、内存管理、并发同步、文件系统——从概念到 MiniMR 落地的逐章手记。</p>
+          <ul class="card-tags"><li>OS</li><li>并发</li><li>系统</li></ul>
+          <p class="card-status">持续更新</p>
+        </div>
+
+        <div class="work-card" data-cat="notes">
+          <div class="card-index"><span class="cur">02</span><span class="sep">/</span><span class="tot">3</span></div>
+          <h3 class="card-title">计算机网络 · 课内笔记</h3>
+          <p class="card-sub">Computer Networks</p>
+          <p class="card-desc-zh">自底向上：物理层到应用层，TCP/IP 栈、HTTP、DNS——配 wireshark 抓包实验笔记。</p>
+          <ul class="card-tags"><li>Networks</li><li>TCP/IP</li></ul>
+          <p class="card-status">持续更新</p>
+        </div>
+
+        <div class="work-card" data-cat="notes">
+          <div class="card-index"><span class="cur">03</span><span class="sep">/</span><span class="tot">3</span></div>
+          <h3 class="card-title">数据结构与算法 · 课内笔记</h3>
+          <p class="card-sub">DSA</p>
+          <p class="card-desc-zh">从线性表到图、从分治到动态规划——概念梳理 + 经典题复盘，附自己的实现与注解。</p>
+          <ul class="card-tags"><li>DSA</li><li>算法</li></ul>
+          <p class="card-status">持续更新</p>
+        </div>
       </div>
     </section>
 
 
-    <!-- ════════════ CRAFT ════════════ -->
-    <section class="panel" id="craft" data-reveal>
+    <!-- ════════════ P3 · CRAFT（logo 网格 + 动效）════════════ -->
+    <section class="page panel" id="craft" data-page="3">
       <header class="panel-head">
         <span class="panel-no">03</span>
         <span class="panel-rule"></span>
         <span class="panel-label">Craft — 技艺</span>
       </header>
 
-      <div class="craft-grid">
-        <dl class="craft-row reveal-up">
-          <dt>Languages</dt>
-          <dd>Python · C++ · JavaScript · Go · SQL</dd>
-        </dl>
-        <dl class="craft-row reveal-up">
-          <dt>Frontend</dt>
-          <dd>Vue.js · HTML / CSS</dd>
-        </dl>
-        <dl class="craft-row reveal-up">
-          <dt>Tooling</dt>
-          <dd>Git · Linux · Docker</dd>
-        </dl>
-        <dl class="craft-row reveal-up">
-          <dt>Focus</dt>
-          <dd>AI Agents · RAG · Distributed Systems · Research Tooling</dd>
-        </dl>
+      <div class="craft-groups">
+
+        <div class="craft-group" data-craft="lang">
+          <h3 class="craft-h"><span class="craft-h-no">i</span>Languages — 语言</h3>
+          <div class="craft-row">
+            <span class="craft-cell" title="Python"><img src="https://cdn.simpleicons.org/python/3776AB" alt="Python" /><em>Python</em></span>
+            <span class="craft-cell" title="C++"><img src="https://cdn.simpleicons.org/c++/00599C" alt="C++" /><em>C++</em></span>
+            <span class="craft-cell" title="JavaScript"><img src="https://cdn.simpleicons.org/javascript/F7DF1E" alt="JavaScript" /><em>JavaScript</em></span>
+            <span class="craft-cell" title="Go"><img src="https://cdn.simpleicons.org/go/00ADD8" alt="Go" /><em>Go</em></span>
+            <span class="craft-cell" title="Rust"><img src="https://cdn.simpleicons.org/rust/CE412B" alt="Rust" /><em>Rust</em></span>
+            <span class="craft-cell" title="SQL"><img src="https://cdn.simpleicons.org/postgresql/416E5A" alt="SQL" /><em>SQL</em></span>
+          </div>
+        </div>
+
+        <div class="craft-group" data-craft="front">
+          <h3 class="craft-h"><span class="craft-h-no">ii</span>Frontend — 前端</h3>
+          <div class="craft-row">
+            <span class="craft-cell" title="Vue.js"><img src="https://cdn.simpleicons.org/vuedotjs/4FC08D" alt="Vue.js" /><em>Vue.js</em></span>
+            <span class="craft-cell" title="HTML5"><img src="https://cdn.simpleicons.org/html5/E34F26" alt="HTML5" /><em>HTML5</em></span>
+            <span class="craft-cell" title="CSS3"><img src="https://cdn.simpleicons.org/css3/1572B6" alt="CSS3" /><em>CSS3</em></span>
+          </div>
+        </div>
+
+        <div class="craft-group" data-craft="tool">
+          <h3 class="craft-h"><span class="craft-h-no">iii</span>Tooling — 工具链</h3>
+          <div class="craft-row">
+            <span class="craft-cell" title="Git"><img src="https://cdn.simpleicons.org/git/F05032" alt="Git" /><em>Git</em></span>
+            <span class="craft-cell" title="Linux"><img src="https://cdn.simpleicons.org/linux/FCC624" alt="Linux" /><em>Linux</em></span>
+            <span class="craft-cell" title="Docker"><img src="https://cdn.simpleicons.org/docker/2496ED" alt="Docker" /><em>Docker</em></span>
+            <span class="craft-cell" title="Postgres"><img src="https://cdn.simpleicons.org/postgresql/416E5A" alt="PostgreSQL" /><em>PostgreSQL</em></span>
+          </div>
+        </div>
+
+        <div class="craft-group" data-craft="focus">
+          <h3 class="craft-h"><span class="craft-h-no">iv</span>Focus — 方向</h3>
+          <div class="craft-row craft-row--words">
+            <span class="craft-word">AI Agents</span>
+            <span class="craft-word">RAG</span>
+            <span class="craft-word">Distributed Systems</span>
+            <span class="craft-word">Research Tooling</span>
+          </div>
+        </div>
+
       </div>
     </section>
 
 
-    <!-- ════════════ MANIFESTO ════════════ -->
-    <section class="manifesto" id="manifesto" data-reveal>
-      <div class="manifesto-mark reveal-up">¶</div>
-      <blockquote class="manifesto-quote reveal-up">
+    <!-- ════════════ P4 · MANIFESTO（卷首语）════════════ -->
+    <section class="page manifesto" id="manifesto" data-page="4">
+      <div class="manifesto-mark">¶</div>
+      <blockquote class="manifesto-quote">
         The boundary of intelligence is not<br />
         what it <em>knows</em> —<br />
         but the next question it <em>dares to ask.</em>
       </blockquote>
-      <p class="manifesto-zh reveal-up">
+      <p class="manifesto-zh">
         智能的边界，不在它所知，<br />
         而在它敢于追问的下一问。
       </p>
     </section>
 
 
-    <!-- ════════════ CONTACT ════════════ -->
-    <footer class="colophon" id="contact" data-reveal>
+    <!-- ════════════ P5 · CONTACT ════════════ -->
+    <footer class="page colophon" id="contact" data-page="5">
       <header class="panel-head">
         <span class="panel-no">05</span>
         <span class="panel-rule"></span>
@@ -279,21 +343,21 @@
       </header>
 
       <div class="contact-grid">
-        <a class="contact-link reveal-up" href="https://github.com/AM-SuSh" target="_blank" rel="noopener">
+        <a class="contact-link" href="https://github.com/AM-SuSh" target="_blank" rel="noopener">
           <span class="contact-k">GitHub</span>
           <span class="contact-v">@AM-SuSh ↗</span>
         </a>
-        <a class="contact-link reveal-up" href="mailto:your@email.com">
+        <a class="contact-link" href="mailto:your@email.com">
           <span class="contact-k">Email</span>
           <span class="contact-v">your@email.com ↗</span>
         </a>
-        <a class="contact-link reveal-up" href="https://am-sush.github.io" target="_blank" rel="noopener">
+        <a class="contact-link" href="https://am-sush.github.io" target="_blank" rel="noopener">
           <span class="contact-k">This Journal</span>
           <span class="contact-v">am-sush.github.io ↗</span>
         </a>
       </div>
 
-      <div class="footer-note reveal-up">
+      <div class="footer-note">
         <p>Set in <em>Playfair Display</em>, <em>EB Garamond</em> &amp; <em>Noto Serif SC</em>.</p>
         <p>Handcrafted with care · Vol. 01 · 2026.</p>
         <p class="footer-motto">“Stay hungry, stay foolish.” &nbsp;—— 求知若饥，虚心若愚。</p>
