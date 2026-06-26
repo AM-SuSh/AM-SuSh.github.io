@@ -102,7 +102,7 @@
       if (pageScrollable(p) && !atTop(p)) return;
       e.preventDefault(); prev();
     } else if (e.key === "Home") { e.preventDefault(); goTo(0, "up"); }
-    else if (e.key === "End")   { e.preventDefault(); goTo(N - 1, "down"); }
+    else if (e.key === "End") { e.preventDefault(); goTo(N - 1, "down"); }
   });
 
   /* ---- 触屏滑动 ---- */
@@ -167,15 +167,40 @@
     }, { passive: true });
   });
 
-  /* ====================== Work 分类轮换 ====================== */
-  var tabs = Array.prototype.slice.call(document.querySelectorAll(".work-tab"));
+  /* ====================== Work 时间轴 + 详情卡联动 ====================== */
+  var railCats = Array.prototype.slice.call(document.querySelectorAll(".rail-cat"));
+  var railItems = Array.prototype.slice.call(document.querySelectorAll(".rail-item"));
   var cards = Array.prototype.slice.call(document.querySelectorAll(".work-card"));
   var stage = document.getElementById("workStage");
   var autoTimer = null;
   var catIndex = {};   // { ai: 当前显示序号, tools: ..., ... }
+  var activeCat = "ai";
 
   function cardsOf(cat) {
     return cards.filter(function (c) { return c.getAttribute("data-cat") === cat; });
+  }
+
+  function itemsOf(cat) {
+    return railItems.filter(function (r) {
+      return r.getAttribute("data-id") && r.getAttribute("data-id").indexOf(cat + "-") === 0;
+    });
+  }
+
+  /* 同步时间轴项目节点的高亮 */
+  function syncRailActive(cat, idx) {
+    var id = cat + "-" + idx;
+    railItems.forEach(function (r) {
+      r.classList.toggle("is-active", r.getAttribute("data-id") === id);
+    });
+  }
+
+  /* 更新详情卡右下角的 位置计数（01 / N） */
+  function updateCardNav(cat, idx) {
+    var pos = document.getElementById("cardPos");
+    if (!pos) return;
+    var list = cardsOf(cat);
+    var n = list.length;
+    pos.textContent = String(idx + 1).padStart(2, "0") + " / " + n;
   }
 
   function showCard(cat, dir, manual) {
@@ -184,33 +209,54 @@
     if (catIndex[cat] === undefined) catIndex[cat] = 0;
     var idx = catIndex[cat];
 
-    // 关键：清掉【全部】卡片的 is-on，避免跨分类叠层
     cards.forEach(function (c) { c.classList.remove("is-on", "flip-next", "flip-prev"); });
     var card = list[idx];
     card.classList.add("is-on");
     card.classList.add(dir === "prev" ? "flip-prev" : "flip-next");
+
+    syncRailActive(cat, idx);
+    updateCardNav(cat, idx);
   }
 
   function advanceCard(dir) {
-    var activeTab = document.querySelector(".work-tab.active");
-    if (!activeTab) return;
-    var cat = activeTab.getAttribute("data-cat");
-    var list = cardsOf(cat);
+    var list = cardsOf(activeCat);
     if (!list.length) return;
-    var idx = catIndex[cat] || 0;
+    var idx = catIndex[activeCat] || 0;
     idx = (idx + (dir === "prev" ? -1 : 1) + list.length) % list.length;
-    catIndex[cat] = idx;
-    showCard(cat, dir, true);
+    catIndex[activeCat] = idx;
+    showCard(activeCat, dir, true);
     restartAuto();
   }
 
-  function selectCat(cat) {
-    tabs.forEach(function (t) {
-      var on = t.getAttribute("data-cat") === cat;
-      t.classList.toggle("active", on);
-      t.setAttribute("aria-selected", on ? "true" : "false");
+  /* 折叠/展开分类；展开时切换为当前活动分类 */
+  function toggleCat(cat, open) {
+    railCats.forEach(function (rc) {
+      var c = rc.getAttribute("data-cat");
+      if (c === cat) {
+        var willOpen = open === undefined ? !rc.classList.contains("is-open") : open;
+        rc.classList.toggle("is-open", willOpen);
+        var btn = rc.querySelector(".rail-cat-btn");
+        if (btn) btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      }
     });
-    catIndex[cat] = 0;
+  }
+
+  function selectCat(cat) {
+    activeCat = cat;
+    catIndex[cat] = catIndex[cat] || 0;
+    toggleCat(cat, true);     // 展开目标分类（不强制收起其他分类，允许多开）
+    showCard(cat, "next", true);
+    restartAuto();
+  }
+
+  /* 点击项目节点 → 直接定位该详情卡 */
+  function jumpToItem(id) {
+    var parts = id.split("-");
+    var cat = parts[0];
+    var idx = parseInt(parts[1], 10);
+    if (isNaN(idx)) return;
+    activeCat = cat;
+    catIndex[cat] = idx;
     showCard(cat, "next", true);
     restartAuto();
   }
@@ -218,31 +264,47 @@
   function restartAuto() {
     clearInterval(autoTimer);
     if (reduceMotion) return;
-    if (stage) { stage.classList.remove("auto"); void stage.offsetWidth; stage.classList.add("auto"); }
     autoTimer = setInterval(function () {
-      // 只在 Work 页可见时轮换
       if (current === 2) advanceCard("next");
     }, 5000);
   }
 
-  tabs.forEach(function (t) {
-    t.addEventListener("click", function () { selectCat(t.getAttribute("data-cat")); });
+  /* 事件绑定：分类折叠按钮 */
+  railCats.forEach(function (rc) {
+    var btn = rc.querySelector(".rail-cat-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var cat = rc.getAttribute("data-cat");
+      var willOpen = !rc.classList.contains("is-open");
+      toggleCat(cat, willOpen);
+      if (willOpen) selectCat(cat);
+    });
   });
 
-  // 悬停在卡片上：暂停自动轮换，显示“下一张”提示
+  /* 事件绑定：项目节点点击 */
+  railItems.forEach(function (r) {
+    r.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var id = r.getAttribute("data-id");
+      if (id) jumpToItem(id);
+    });
+  });
+
+  /* 悬停在舞台上：暂停自动轮换 */
   if (stage) {
-    stage.addEventListener("mouseenter", function () { clearInterval(autoTimer); stage.classList.remove("auto"); });
+    stage.addEventListener("mouseenter", function () { clearInterval(autoTimer); });
     stage.addEventListener("mouseleave", function () {
       if (current === 2) restartAuto();
     });
-    // 点击舞台空白处 = 下一张
-    stage.addEventListener("click", function (e) {
-      if (e.target.closest(".card-link")) return;   // 链接不拦截
-      advanceCard("next");
-    });
   }
 
-  // 当切到 Work 页时启动轮换
+  /* 详情卡导航按钮 */
+  var cardPrev = document.getElementById("cardPrev");
+  var cardNext = document.getElementById("cardNext");
+  if (cardPrev) cardPrev.addEventListener("click", function (e) { e.stopPropagation(); advanceCard("prev"); });
+  if (cardNext) cardNext.addEventListener("click", function (e) { e.stopPropagation(); advanceCard("next"); });
+
   /* ====================== 初始化 ====================== */
   function init() {
     pages.forEach(function (p, i) {
@@ -251,7 +313,7 @@
     });
     syncNav();
     updateProgress();
-    // Work 默认分类
+    // Work 默认：展开 AI 分类，显示第 1 项
     catIndex.ai = 0;
     showCard("ai", "next", false);
   }
