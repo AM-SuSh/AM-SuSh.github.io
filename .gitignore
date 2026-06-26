@@ -1,0 +1,14 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Deps / build (本项目无构建，留作扩展)
+node_modules/
+dist/
+.cache/
