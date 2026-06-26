@@ -580,18 +580,31 @@ em {
 
 
 /* =========================================================================
-   WORK —— 左侧时间轴 + 右侧详情卡
+   WORK —— 左侧时间轴 + 右侧详情卡（单页无滚动 · 栏间环状立体感）
    ========================================================================= */
+
+/* Work 页锁定视口高度，禁止页内滚动 */
+.work-page {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: clamp(1.2rem, 2.5vh, 1.8rem);
+}
+.work-page .work-head {
+  margin-bottom: clamp(0.7rem, 1.8vh, 1.1rem);
+  flex-shrink: 0;
+}
 
 /* 两栏舞台：左 时间轴 · 右 详情卡 */
 .work-stage {
   position: relative;
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(16rem, 0.9fr) 1fr;
-  gap: clamp(1.5rem, 4vw, 3.5rem);
+  grid-template-columns: minmax(14rem, 0.82fr) 1fr;
+  gap: clamp(1.2rem, 3vw, 2.8rem);
   align-items: stretch;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* ──────────────── 左侧：时间轴 ──────────────── */
@@ -600,7 +613,10 @@ em {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-right: 0.5rem;
+  padding-right: 0.4rem;
+  /* 整栏透视：让分类栏之间也有环状纵深感 */
+  perspective: 700px;
+  perspective-origin: 50% 50%;
 }
 .rail-list {
   list-style: none;
@@ -613,29 +629,54 @@ em {
   content: "";
   position: absolute;
   left: 0.42rem;
-  top: 0.6rem;
-  bottom: 0.6rem;
+  top: 0.5rem;
+  bottom: 0.5rem;
   width: 1px;
   background: linear-gradient(var(--rule), var(--rule) 70%, transparent);
 }
 
-/* 分类节点（可折叠枝） */
+/* 分类节点（可折叠枝）——整体也按环距做立体感 */
 .rail-cat {
   position: relative;
+  --cat-scale: 1;
+  --cat-opacity: 1;
+  --cat-y: 0;
+  transform: translateY(var(--cat-y)) scale(var(--cat-scale));
+  opacity: var(--cat-opacity);
+  transform-origin: left center;
+  transition: transform 0.45s var(--ease), opacity 0.45s var(--ease);
 }
 .rail-cat + .rail-cat {
-  margin-top: 0.2rem;
+  margin-top: 0.1rem;
+}
+/* 栏间环距：活动栏突出，其余栏缩小渐隐 */
+.rail-cat[data-cat-dist="0"] { --cat-scale: 1.06; --cat-opacity: 1;    }
+.rail-cat[data-cat-dist="1"] { --cat-scale: 0.92; --cat-opacity: 0.55;  }
+.rail-cat[data-cat-dist="2"] { --cat-scale: 0.84; --cat-opacity: 0.35;  }
+.rail-cat[data-cat-dist="3"] { --cat-scale: 0.78; --cat-opacity: 0.2;  }
+
+/* 活动栏：整栏字号放大突出 */
+.rail-cat.is-active-cat .rail-cat-name {
+  font-size: clamp(1.05rem, 1.65vw, 1.22rem);
+}
+.rail-cat.is-active-cat .rail-cat-no {
+  font-size: 0.88rem;
+}
+.rail-cat.is-active-cat .rail-item {
+  font-size: 0.92rem;
+  padding: 0.34rem 0.6rem 0.34rem 1.7rem;
 }
 
+/* 分类行：整行可点 */
 .rail-cat-btn {
   width: 100%;
   display: flex;
   align-items: baseline;
-  gap: 0.55rem;
+  gap: 0.5rem;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--rule);
-  padding: 0.7rem 0.2rem 0.7rem 1.4rem;
+  padding: 0.55rem 0.2rem 0.55rem 1.4rem;
   cursor: pointer;
   text-align: left;
   color: var(--ink-soft);
@@ -673,18 +714,18 @@ em {
 .rail-cat-no {
   font-family: var(--serif-en);
   font-style: italic;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: var(--accent);
   min-width: 1.1rem;
 }
 .rail-cat-name {
   font-family: var(--serif-en);
   font-weight: 600;
-  font-size: clamp(0.98rem, 1.5vw, 1.12rem);
+  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
   letter-spacing: 0.01em;
 }
 .rail-cat-sub {
-  font-size: 0.62rem;
+  font-size: 0.58rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -694,7 +735,7 @@ em {
 .rail-cat-count {
   font-family: var(--serif-en);
   font-style: italic;
-  font-size: 0.74rem;
+  font-size: 0.7rem;
   color: var(--ink-faint);
   min-width: 1.4rem;
   text-align: right;
@@ -707,6 +748,7 @@ em {
   color: var(--ink-mute);
   transition: transform 0.35s var(--ease), color 0.35s var(--ease);
   display: inline-block;
+  margin-left: 0.15rem;
 }
 .rail-cat.is-open .rail-caret {
   transform: rotate(45deg);
@@ -722,6 +764,30 @@ em {
   grid-template-rows: 1fr;
   transition: grid-template-rows 0.4s var(--ease);
   overflow: hidden;
+  /* 环状立体感：给子节点透视 */
+  perspective: 600px;
+  perspective-origin: 50% 50%;
+  position: relative;
+  /* 渐变遮罩与父级纸色衔接，需 isolate 避免遮罩覆盖节点点击 */
+  isolation: isolate;
+}
+/* 首尾半透明衔接遮罩：节点像从环背面转出/转入 */
+.rail-items::before,
+.rail-items::after {
+  content: "";
+  position: absolute;
+  left: 0; right: 0;
+  height: 1.1rem;
+  pointer-events: none;
+  z-index: 4;
+}
+.rail-items::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--paper), rgba(246,243,236,0.6) 55%, transparent);
+}
+.rail-items::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--paper), rgba(246,243,236,0.6) 55%, transparent);
 }
 .rail-cat:not(.is-open) .rail-items {
   grid-template-rows: 0fr;
@@ -730,15 +796,32 @@ em {
 .rail-item {
   display: flex;
   align-items: baseline;
-  gap: 0.55rem;
-  padding: 0.4rem 0.6rem 0.4rem 1.7rem;
-  margin: 0.05rem 0;
+  gap: 0.5rem;
+  padding: 0.28rem 0.6rem 0.28rem 1.7rem;
+  margin: 0.02rem 0;
   cursor: pointer;
   color: var(--ink-mute);
-  font-size: 0.92rem;
+  font-size: 0.84rem;
   border-radius: 1px;
   position: relative;
-  transition: color 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease);
+  transition: color 0.35s var(--ease), background 0.35s var(--ease), transform 0.45s var(--ease), opacity 0.45s var(--ease);
+  transform-origin: left center;
+  /* 默认（非当前分类 / 未定） */
+  --rail-scale: 1;
+  --rail-y: 0;
+  --rail-rotate: 0deg;
+  --rail-opacity: 1;
+  transform: translateY(var(--rail-y)) scale(var(--rail-scale)) rotate(var(--rail-rotate));
+  opacity: var(--rail-opacity);
+}
+
+/* 环距立体感：按 data-dist 调整缩放/偏移/透明度，
+   营造节点贴在纵向环面上的视觉，首尾相接处渐隐 */
+.rail-item[data-dist="0"] { --rail-scale: 1.08; --rail-y: 0;    --rail-opacity: 1;    }
+.rail-item[data-dist="1"] { --rail-scale: 0.92; --rail-y: 2px;  --rail-opacity: 0.62; }
+.rail-item[data-dist="2"] { --rail-scale: 0.78; --rail-y: 4px;  --rail-opacity: 0.32; }
+.rail-item[data-dist="3"] { --rail-scale: 0.68; --rail-y: 6px;  --rail-opacity: 0.16; }
+.rail-item[data-dist="x"] { --rail-opacity: 0.55; --rail-scale: 0.96; }   /* 非当前分类节点 */
 }
 /* 项目节点圆点（压在主线上） */
 .rail-node {
@@ -788,27 +871,12 @@ em {
   color: var(--accent);
 }
 
-/* 提示文字 */
-.rail-hint {
-  margin-top: 1rem;
-  padding-left: 1.4rem;
-  font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  color: var(--ink-faint);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.rail-hint .hint-icon {
-  color: var(--accent);
-  font-size: 0.85rem;
-}
-
 /* ──────────────── 右侧：轮播详情卡 ──────────────── */
 .card-stage {
   position: relative;
-  /* 详情卡在此区域内绝对定位切换 */
-  min-height: clamp(18rem, 42vh, 25rem);
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .work-card {
@@ -817,10 +885,16 @@ em {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(10px);
   pointer-events: none;
-  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  transition: opacity 0.45s var(--ease), transform 0.45s var(--ease);
+  padding: 0 clamp(0.5rem, 3vw, 1.5rem);
+}
+.work-card > * {
+  width: 100%;
+  max-width: 48ch;
 }
 
 .work-card.is-on {
@@ -865,13 +939,13 @@ em {
   font-family: var(--serif-en);
   font-style: italic;
   color: var(--ink-faint);
-  font-size: 0.95rem;
-  margin-bottom: 0.9rem;
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .card-index .cur {
   color: var(--accent);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
 }
 
 .card-index .sep {
@@ -881,43 +955,43 @@ em {
 .card-title {
   font-family: var(--serif-en);
   font-weight: 600;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(1.9rem, 4.2vw, 2.75rem);
   line-height: 1.1;
   letter-spacing: -0.01em;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.4rem;
 }
 
 .card-sub {
   font-family: var(--serif-zh);
-  font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+  font-size: clamp(1.05rem, 1.7vw, 1.25rem);
   color: var(--accent);
   letter-spacing: 0.06em;
-  margin-bottom: 1.1rem;
+  margin-bottom: 1rem;
 }
 
 .card-desc {
-  font-size: 0.98rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
   line-height: 1.65;
-  max-width: 50ch;
-  margin-bottom: 0.55rem;
+  max-width: 52ch;
+  margin-bottom: 0.65rem;
 }
 
 .card-desc-zh {
   font-family: var(--serif-zh);
-  font-size: 0.88rem;
+  font-size: 0.98rem;
   color: var(--ink-mute);
   line-height: 1.9;
-  max-width: 48ch;
-  margin-bottom: 1.1rem;
+  max-width: 50ch;
+  margin-bottom: 1rem;
 }
 
 .card-tags {
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.1rem;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
 }
 
 .card-tags li {

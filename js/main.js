@@ -59,6 +59,7 @@
 
   /* 某页是否需要内部滚动（内容比视口高） */
   function pageScrollable(p) {
+    if (p.id === "work") return false;
     return p.scrollHeight - p.clientHeight > 4;
   }
   /* 当前页是否已滚动到顶/底，可允许翻页 */
@@ -175,6 +176,7 @@
   var autoTimer = null;
   var catIndex = {};   // { ai: 当前显示序号, tools: ..., ... }
   var activeCat = "ai";
+  var catOrder = railCats.map(function (rc) { return rc.getAttribute("data-cat"); });
 
   function cardsOf(cat) {
     return cards.filter(function (c) { return c.getAttribute("data-cat") === cat; });
@@ -186,11 +188,42 @@
     });
   }
 
-  /* 同步时间轴项目节点的高亮 */
+  /* 同步时间轴项目节点的高亮 + 环距立体感，并设置分类栏间环距 */
   function syncRailActive(cat, idx) {
     var id = cat + "-" + idx;
+    var totalCats = railCats.length;
+
     railItems.forEach(function (r) {
-      r.classList.toggle("is-active", r.getAttribute("data-id") === id);
+      var rid = r.getAttribute("data-id") || "";
+      var isActive = rid === id;
+      r.classList.toggle("is-active", isActive);
+
+      /* 只对当前分类的节点计算环距，其他分类节点置为隐藏态 */
+      var inCat = rid.indexOf(cat + "-") === 0;
+      if (!inCat) {
+        r.setAttribute("data-dist", "x");
+        return;
+      }
+      var n = cardsOf(cat).length;
+      var i = parseInt(rid.split("-")[1], 10) || 0;
+      var dist = Math.abs(i - idx);
+      dist = Math.min(dist, n - dist);   /* 环距：考虑首尾相接 */
+      r.setAttribute("data-dist", String(dist));
+    });
+
+    /* 分类栏间环距：距当前活动分类越远越缩小渐隐 */
+    railCats.forEach(function (rc) {
+      var c = rc.getAttribute("data-cat");
+      if (c === cat) {
+        rc.setAttribute("data-cat-dist", "0");
+        return;
+      }
+      var ci = catOrder.indexOf(c);
+      var ai = catOrder.indexOf(cat);
+      if (ci < 0 || ai < 0) { rc.setAttribute("data-cat-dist", "3"); return; }
+      var d = Math.abs(ci - ai);
+      d = Math.min(d, totalCats - d);   /* 首尾相接 */
+      rc.setAttribute("data-cat-dist", String(d));
     });
   }
 
@@ -228,28 +261,28 @@
     restartAuto();
   }
 
-  /* 折叠/展开分类；展开时切换为当前活动分类 */
-  function toggleCat(cat, open) {
+  /* 手风琴：仅保留一个活动栏，其余折叠 */
+  function setActiveCat(cat) {
     railCats.forEach(function (rc) {
       var c = rc.getAttribute("data-cat");
-      if (c === cat) {
-        var willOpen = open === undefined ? !rc.classList.contains("is-open") : open;
-        rc.classList.toggle("is-open", willOpen);
-        var btn = rc.querySelector(".rail-cat-btn");
-        if (btn) btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
-      }
+      var on = c === cat;
+      rc.classList.toggle("is-open", on);
+      rc.classList.toggle("is-active-cat", on);
+      var btn = rc.querySelector(".rail-cat-btn");
+      if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
     });
   }
 
+  /* 切换活动分类：展开该栏、收起其余，右侧轮播该栏内项目 */
   function selectCat(cat) {
     activeCat = cat;
     catIndex[cat] = catIndex[cat] || 0;
-    toggleCat(cat, true);     // 展开目标分类（不强制收起其他分类，允许多开）
+    setActiveCat(cat);
     showCard(cat, "next", true);
     restartAuto();
   }
 
-  /* 点击项目节点 → 直接定位该详情卡 */
+  /* 点击项目节点 → 激活该栏并定位详情卡 */
   function jumpToItem(id) {
     var parts = id.split("-");
     var cat = parts[0];
@@ -257,6 +290,7 @@
     if (isNaN(idx)) return;
     activeCat = cat;
     catIndex[cat] = idx;
+    setActiveCat(cat);
     showCard(cat, "next", true);
     restartAuto();
   }
@@ -266,19 +300,16 @@
     if (reduceMotion) return;
     autoTimer = setInterval(function () {
       if (current === 2) advanceCard("next");
-    }, 5000);
+    }, 3000);
   }
 
-  /* 事件绑定：分类折叠按钮 */
+  /* 事件绑定：分类标题整行点击 → 切换为活动栏 */
   railCats.forEach(function (rc) {
     var btn = rc.querySelector(".rail-cat-btn");
     if (!btn) return;
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
-      var cat = rc.getAttribute("data-cat");
-      var willOpen = !rc.classList.contains("is-open");
-      toggleCat(cat, willOpen);
-      if (willOpen) selectCat(cat);
+      selectCat(rc.getAttribute("data-cat"));
     });
   });
 
@@ -313,8 +344,9 @@
     });
     syncNav();
     updateProgress();
-    // Work 默认：展开 AI 分类，显示第 1 项
+    // Work 默认：AI 为唯一活动栏
     catIndex.ai = 0;
+    setActiveCat("ai");
     showCard("ai", "next", false);
   }
   init();
