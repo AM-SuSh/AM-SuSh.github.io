@@ -822,7 +822,7 @@ em {
 .rail-item[data-dist="2"] { --rail-scale: 0.78; --rail-y: 4px;  --rail-opacity: 0.32; }
 .rail-item[data-dist="3"] { --rail-scale: 0.68; --rail-y: 6px;  --rail-opacity: 0.16; }
 .rail-item[data-dist="x"] { --rail-opacity: 0.55; --rail-scale: 0.96; }   /* 非当前分类节点 */
-}
+
 /* 项目节点圆点（压在主线上） */
 .rail-node {
   position: absolute;
@@ -1074,9 +1074,9 @@ em {
 
 
 /* =========================================================================
-   CRAFT —— logo 网格 + 动效
+   skill —— logo 网格 + 动效
    ========================================================================= */
-.craft-groups {
+.skill-groups {
   display: flex;
   flex-direction: column;
   gap: clamp(0.8rem, 2vh, 1.4rem);
@@ -1084,7 +1084,7 @@ em {
   justify-content: center;
 }
 
-.craft-h {
+.skill-h {
   font-family: var(--serif-en);
   font-style: italic;
   font-weight: 500;
@@ -1096,30 +1096,30 @@ em {
   gap: 0.6rem;
 }
 
-.craft-h::after {
+.skill-h::after {
   content: "";
   flex: 1;
   height: 1px;
   background: var(--rule);
 }
 
-.craft-h-no {
+.skill-h-no {
   color: var(--accent);
   font-size: 0.8em;
 }
 
-.craft-row {
+.skill-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
   gap: 0.6rem;
 }
 
-.craft-row--words {
+.skill-row--words {
   grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
   gap: 0.6rem;
 }
 
-.craft-cell {
+.skill-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1132,13 +1132,13 @@ em {
   overflow: hidden;
 }
 
-.craft-cell img {
+.skill-cell img {
   width: 1.9rem;
   height: 1.9rem;
   transition: transform 0.5s var(--ease);
 }
 
-.craft-cell em {
+.skill-cell em {
   font-style: normal;
   font-family: var(--serif-body);
   font-size: 0.74rem;
@@ -1147,18 +1147,18 @@ em {
 }
 
 /* 悬停：单元格浮起 + 图标放大旋转 */
-.craft-cell:hover {
+.skill-cell:hover {
   transform: translateY(-4px);
   border-color: var(--accent-soft);
   background: rgba(255, 255, 255, 0.5);
 }
 
-.craft-cell:hover img {
+.skill-cell:hover img {
   transform: scale(1.16) rotate(-6deg);
 }
 
 /* 光泽扫过 */
-.craft-cell::before {
+.skill-cell::before {
   content: "";
   position: absolute;
   top: 0;
@@ -1169,40 +1169,40 @@ em {
   transition: left 0.6s var(--ease);
 }
 
-.craft-cell:hover::before {
+.skill-cell:hover::before {
   left: 140%;
 }
 
 /* 进入页面时逐个浮现（stagger） */
-.craft-group {
+.skill-group {
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
 }
 
-.page.is-active .craft-group {
+.page.is-active .skill-group {
   opacity: 1;
   transform: none;
 }
 
-.page.is-active .craft-group:nth-child(1) {
+.page.is-active .skill-group:nth-child(1) {
   transition-delay: 0.12s;
 }
 
-.page.is-active .craft-group:nth-child(2) {
+.page.is-active .skill-group:nth-child(2) {
   transition-delay: 0.2s;
 }
 
-.page.is-active .craft-group:nth-child(3) {
+.page.is-active .skill-group:nth-child(3) {
   transition-delay: 0.28s;
 }
 
-.page.is-active .craft-group:nth-child(4) {
+.page.is-active .skill-group:nth-child(4) {
   transition-delay: 0.36s;
 }
 
 /* Focus 方向 —— 词卡（紧凑单行） */
-.craft-word {
+.skill-word {
   font-family: var(--serif-en);
   font-style: italic;
   font-size: 0.98rem;
@@ -1213,7 +1213,7 @@ em {
   transition: background 0.4s var(--ease), color 0.4s var(--ease), transform 0.4s var(--ease);
 }
 
-.craft-word:hover {
+.skill-word:hover {
   background: var(--ink);
   color: var(--paper);
   transform: translateX(5px);
@@ -1427,11 +1427,11 @@ em {
     font-size: clamp(2rem, 8vw, 3rem);
   }
 
-  .craft-row {
+  .skill-row {
     grid-template-columns: repeat(3, 1fr);
   }
 
-  .craft-row--words {
+  .skill-row--words {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -1482,16 +1482,16 @@ em {
     height: 10px;
   }
 
-  .craft-row {
+  .skill-row {
     grid-template-columns: repeat(3, 1fr);
     gap: 0.5rem;
   }
 
-  .craft-cell {
+  .skill-cell {
     padding: 0.9rem 0.3rem;
   }
 
-  .craft-cell img {
+  .skill-cell img {
     width: 2rem;
     height: 2rem;
   }
