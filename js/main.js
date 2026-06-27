@@ -187,6 +187,7 @@
   var railItems = Array.prototype.slice.call(document.querySelectorAll(".rail-item"));
   var cards = Array.prototype.slice.call(document.querySelectorAll(".work-card"));
   var railList = document.querySelector(".rail-list");
+  var workRail = document.querySelector(".work-rail");
   var stage = document.getElementById("workStage");
   var autoTimer = null;
 
@@ -207,6 +208,21 @@
   var itemSeq = seq.filter(function (s) { return s.type === "item"; });
   var curIndex = 0;   /* 当前处于环中心的项目序号 */
 
+  /* 轮盘上所有可见节点（分类标题 + 项目） */
+  var wheelNodes = [];
+  seq.forEach(function (s, i) {
+    var el = s.type === "cat" ? s.el.querySelector(".rail-cat-btn") : s.el;
+    if (el) wheelNodes.push({ el: el, seqIdx: i, type: s.type, id: s.id || null });
+  });
+
+  function seqIdxOfItem(itemIdx) {
+    var id = itemSeq[itemIdx].id;
+    for (var i = 0; i < seq.length; i++) {
+      if (seq[i].type === "item" && seq[i].id === id) return i;
+    }
+    return 0;
+  }
+
   function cardById(id) {
     for (var i = 0; i < cards.length; i++) {
       if (cards[i].getAttribute("data-id") === id) return cards[i];
@@ -215,17 +231,14 @@
   }
   function catOf(id) { return id.split("-")[0]; }
 
-  /* 把项目序号 idx 滚动到环中心。
-     立体感与渐隐由实际的滚动像素位置驱动（连续、丝滑），
-     而非离散台阶；scroll 监听里实时重算。 */
-  function focusItem(idx, dir) {
-    idx = (idx + itemSeq.length) % itemSeq.length;   /* 衔尾蛇：首尾相接 */
+  /* 把项目序号 idx 转到轮盘中心（带动画滑动） */
+  function focusItem(idx, dir, instant) {
+    idx = (idx + itemSeq.length) % itemSeq.length;
     curIndex = idx;
-    var node = itemSeq[idx].el;
     var target = itemSeq[idx].id;
     var activeCat = catOf(target);
+    var targetSeqIdx = seqIdxOfItem(idx);
 
-    /* —— 高亮（基于序号，确定性强） —— */
     railItems.forEach(function (r) {
       var id = r.getAttribute("data-id") || "";
       var inSeq = -1, k;
@@ -238,16 +251,14 @@
       rc.classList.toggle("is-cat-active", rc.getAttribute("data-cat") === activeCat);
     });
 
-    /* —— 滚动：把目标节点居中（smooth 由 CSS / 浏览器接管） —— */
-    if (railList && node) {
-      var railRect = railList.getBoundingClientRect();
-      var nodeRect = node.getBoundingClientRect();
-      var targetTop = railList.scrollTop + (nodeRect.top - railRect.top) - (railRect.height - nodeRect.height) / 2;
-      if (reduceMotion) railList.scrollTop = targetTop;
-      else railList.scrollTo({ top: targetTop, behavior: "smooth" });
+    if (instant || reduceMotion) {
+      if (wheelAnimId) cancelAnimationFrame(wheelAnimId);
+      wheelCenter = targetSeqIdx;
+      applyWheelCenter(wheelCenter);
+    } else {
+      spinWheelTo(targetSeqIdx);
     }
 
-    /* —— 右侧详情卡联动 —— */
     cards.forEach(function (c) { c.classList.remove("is-on", "flip-next", "flip-prev"); });
     var card = cardById(target);
     if (card) {
@@ -257,65 +268,125 @@
     updateCardNav(idx);
   }
 
-  /* 滚动驱动：按每个节点到视口中心的像素距离，连续地设置
-     缩放 / 透明度 / 倾斜，让整列像卷在弧面上流动。
-     中心 = 最突出（大、不倾斜、不透明），越往两端的节点越往
-     弧面后方倾斜、越缩小越淡。 */
+  /* 按节点在序列中的环距，连续映射缩放 / 透明度 / 倾斜 —— 轮盘转动 */
   var ringTick = null;
   function scheduleRing() {
     if (ringTick) return;
     ringTick = requestAnimationFrame(function () {
       ringTick = null;
-      applyRing();
+      applyWheelCenter(seqIdxOfItem(curIndex));
     });
   }
-  function applyRing() {
+  function ringOffset(idx, center, total) {
+    var o = idx - center;
+    var half = total / 2;
+    if (o > half) o -= total;
+    if (o < -half) o += total;
+    if (o === half) o = -half;
+    return o;
+  }
+  function ringOffsetFloat(idx, centerFloat, total) {
+    var o = idx - centerFloat;
+    var half = total / 2;
+    while (o > half) o -= total;
+    while (o < -half) o += total;
+    return o;
+  }
+  function ringDelta(from, to, total) {
+    var d = to - from;
+    var half = total / 2;
+    if (d > half) d -= total;
+    if (d < -half) d += total;
+    return d;
+  }
+
+  var wheelCenter = seqIdxOfItem(0);
+  var wheelAnimId = null;
+  var WHEEL_MS = 520;
+
+  function applyWheelCenter(centerFloat) {
     if (!railList) return;
     var viewH = railList.clientHeight;
-    var center = viewH / 2;
-    /* 弧面半径（px）：决定从中心到边缘的弯曲强度 */
-    var R = viewH * 0.52;
-    var half = R;   /* 超过此距离视为转到环背面，渐隐 */
+    if (viewH < 40) viewH = stage ? stage.clientHeight * 0.55 : 320;
+    var ringN = wheelNodes.length;
+    var centerY = viewH / 2;
+    var maxVis = Math.max(Math.floor(ringN / 2), 4);
+    var wheelDiam = viewH * 0.5;
+    var halfSpan = wheelDiam * 0.5;
+    var arcSpread = 0.68;
+    var step = (2 * Math.PI / ringN) * arcSpread;
+    var sinMax = Math.sin(maxVis * step) || 0.01;
+    var R = halfSpan / sinMax;
 
-    /* 项目节点 */
-    railItems.forEach(function (r) {
-      var rect = r.getBoundingClientRect();
-      var elCenter = rect.top + rect.height / 2 - railList.getBoundingClientRect().top;
-      var d = elCenter - center;                 /* 到中心的像素偏移（带方向） */
-      applyArcStyle(r, d, half);
-    });
-    /* 分类栏标题 */
-    railCats.forEach(function (rc) {
-      var btn = rc.querySelector(".rail-cat-btn");
-      if (!btn) return;
-      var rect = btn.getBoundingClientRect();
-      var elCenter = rect.top + rect.height / 2 - railList.getBoundingClientRect().top;
-      var d = elCenter - center;
-      applyArcStyle(btn, d, half);
+    railList.style.setProperty("--wheel-diam", wheelDiam.toFixed(1) + "px");
+
+    wheelNodes.forEach(function (node) {
+      var offset = ringOffsetFloat(node.seqIdx, centerFloat, ringN);
+      var angleRad = offset * step;
+      var y = centerY + R * Math.sin(angleRad);
+      var z = R * 0.32 * (Math.cos(angleRad) - 1);
+      var onFront = Math.cos(angleRad) > -0.12;
+
+      node.el.style.top = y + "px";
+      applyArcStyle(node.el, offset, maxVis, onFront);
+      node.el.style.setProperty("--node-z", z.toFixed(1) + "px");
+
+      var ad = Math.abs(offset);
+      node.el.style.zIndex = String(120 - ad);
+      node.el.style.pointerEvents = !onFront || ad > maxVis - 1 ? "none" : "";
     });
   }
-  /* 连续映射：t = 归一化距离 [0,1]，离中心越远越淡越倾斜 */
-  function applyArcStyle(el, d, half) {
+
+  function spinWheelTo(targetSeqIdx) {
+    if (wheelAnimId) cancelAnimationFrame(wheelAnimId);
+    if (reduceMotion) {
+      wheelCenter = targetSeqIdx;
+      applyWheelCenter(wheelCenter);
+      return;
+    }
+    var ringN = wheelNodes.length;
+    var start = wheelCenter;
+    var delta = ringDelta(start, targetSeqIdx, ringN);
+    if (Math.abs(delta) < 0.001) {
+      wheelCenter = targetSeqIdx;
+      applyWheelCenter(wheelCenter);
+      return;
+    }
+    var t0 = performance.now();
+    function frame(now) {
+      var t = Math.min((now - t0) / WHEEL_MS, 1);
+      var eased = 1 - Math.pow(1 - t, 3);
+      wheelCenter = start + delta * eased;
+      applyWheelCenter(wheelCenter);
+      if (t < 1) wheelAnimId = requestAnimationFrame(frame);
+      else {
+        wheelCenter = targetSeqIdx;
+        applyWheelCenter(wheelCenter);
+        wheelAnimId = null;
+      }
+    }
+    wheelAnimId = requestAnimationFrame(frame);
+  }
+  /* 环面映射：离中心环距越远越淡、越倾；背面节点隐藏 */
+  function applyArcStyle(el, offset, maxVis, onFront) {
     if (!el) return;
-    var ad = Math.abs(d);
-    var t = Math.min(ad / half, 1);              /* 0 中心 → 1 边缘/背面 */
-    /* 用正弦曲线让弯曲更自然：中心变化平缓、边缘加速卷入 */
+    if (!maxVis || maxVis <= 0) maxVis = 4;
+    var ad = Math.abs(offset);
+    var t = Math.min(ad / (maxVis * 0.78), 1);
     var e = Math.sin(t * Math.PI / 2);
-    var scale = 1 - 0.34 * e;                    /* 1 → 0.66 */
-    var opacity = 1 - 0.88 * Math.pow(t, 1.15);  /* 1 → ~0.12 */
-    var dir = d < 0 ? -1 : 1;                    /* 上方节点向后倾，下方向前 */
-    var rotate = dir * 62 * e;                   /* 0 → ±62deg */
+    var scale = 1.05 - 0.24 * e;
+    var opacity = onFront ? 1 - 0.58 * Math.pow(t, 1.05) : 0;
+    var dir = offset < 0 ? -1 : 1;
+    var rotate = dir * 36 * e;
     el.style.setProperty("--node-scale", scale.toFixed(3));
     el.style.setProperty("--node-opacity", opacity.toFixed(3));
     el.style.setProperty("--node-rotate", rotate.toFixed(1) + "deg");
   }
 
-  /* 滚动时实时重排立体感（rAF 节流） */
-  if (railList) {
-    railList.addEventListener("scroll", function () {
-      if (current === 1) scheduleRing();
-    }, { passive: true });
-  }
+  /* 窗口尺寸变化时重算轮盘弧度 */
+  window.addEventListener("resize", function () {
+    if (current === 1) scheduleRing();
+  }, { passive: true });
 
   /* 更新详情卡右下角的位置计数 */
   function updateCardNav(idx) {
@@ -382,12 +453,11 @@
 
   /* 滚轮：鼠标悬停在左侧 rail 时 → 翻项目（在全局 wheel 处理中接管）。
      这里只负责记录悬停状态。 */
-  var rail = document.querySelector(".work-rail");
   var railLock = 0;
   var hoveringRail = false;
-  if (rail) {
-    rail.addEventListener("mouseenter", function () { hoveringRail = true; });
-    rail.addEventListener("mouseleave", function () { hoveringRail = false; });
+  if (workRail) {
+    workRail.addEventListener("mouseenter", function () { hoveringRail = true; });
+    workRail.addEventListener("mouseleave", function () { hoveringRail = false; });
   }
 
   /* ====================== 初始化 ====================== */
@@ -399,19 +469,21 @@
     syncNav();
     updateProgress();
     // Work 默认：首个项目居中
-    focusItem(0, "next");
-    // 首屏立体感（无动画，直接落位）
-    requestAnimationFrame(function () { applyRing(); });
+    focusItem(0, "next", true);
   }
   init();
   restartAuto();
 
-  // Work 页激活后稍延迟重排一次立体感（翻页进入时布局刚稳定）
+  // Work 页激活后稍延迟重排一次轮盘（翻页进入时布局刚稳定）
   var workPage = document.getElementById("work");
   if (workPage) {
     var mo = new MutationObserver(function () {
       if (workPage.classList.contains("is-active")) {
-        setTimeout(function () { applyRing(); }, 60);
+        setTimeout(function () {
+          if (wheelAnimId) cancelAnimationFrame(wheelAnimId);
+          wheelCenter = seqIdxOfItem(curIndex);
+          applyWheelCenter(wheelCenter);
+        }, 80);
       }
     });
     mo.observe(workPage, { attributes: true, attributeFilter: ["class"] });

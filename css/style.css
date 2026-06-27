@@ -607,73 +607,61 @@ em {
   overflow: hidden;
 }
 
-/* ──────────────── 左侧：衔尾蛇环（单一连续序列） ──────────────── */
-/* 所有分类 + 项目按一条纵向环面排列；点击任一节点
-   将其滚动到视口中央突出，距中心越远的节点越缩越淡。 */
+/* ──────────────── 左侧：3D 轮盘（单一连续序列） ──────────────── */
+/* 所有分类 + 项目叠在同一轴心，整盘 rotateX 旋转；
+   点击任一节点 → 轮盘转到该节点居中突出。 */
 .work-rail {
   position: relative;
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
-  overflow: hidden;                 /* 首尾在边缘渐隐，构成环感 */
-  /* 边缘遮罩：与纸色衔接，让环头尾自然淡出 */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
-  mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
-}
-/* 卷边：一条竖向椭圆环，象征整体“卷起来”的环面（衔尾蛇），
-   固定在轨道左侧、不随滚动移动，给节点一个弧形轨道。 */
-.work-rail::before {
-  content: "";
-  position: absolute;
-  left: 0.42rem;
-  top: 9%;
-  bottom: 9%;
-  width: 1.5rem;
-  transform: translateX(-50%);
-  border: 1px solid var(--rule);
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(154, 59, 44, 0.025), transparent 62%);
-  opacity: 0.6;
-  pointer-events: none;
-  z-index: 0;
+  overflow: hidden;
+  /* 环面：边缘仅轻微晕影，不暗示「到头了」 */
+  -webkit-mask-image: radial-gradient(ellipse 115% 88% at 50% 50%, #000 58%, transparent 100%);
+  mask-image: radial-gradient(ellipse 115% 88% at 50% 50%, #000 58%, transparent 100%);
 }
 .rail-list {
   list-style: none;
   margin: 0;
   padding: 0;
   position: relative;
-  /* 纵向滚动接管：JS 滚动到目标节点 */
-  overflow-y: auto;
-  overflow-x: hidden;
-  height: 100%;
-  scrollbar-width: none;
-  padding: 40% 0;
-  /* 环面透视：每个节点按其到中心的距离做 rotateX，
-     仿佛贴在卷边的环面上转动 */
-  perspective: 460px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-height: 10rem;
+  overflow: hidden;
+  /* 3D 轮盘视口：节点叠在中心轴上，由 JS 按环距旋转 */
+  perspective: 720px;
   perspective-origin: 50% 50%;
   transform-style: preserve-3d;
 }
-.rail-list::-webkit-scrollbar { width: 0; height: 0; }
-
-/* 纵向时间轴主线：弱化为卷边内侧的极细引导，被环面包裹 */
-.rail-list::before {
+/* 弧影与轮盘同容器、同直径（--wheel-diam），垂直居中 */
+.rail-list::after {
   content: "";
   position: absolute;
-  left: 0.42rem;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: linear-gradient(transparent, var(--rule) 18%, var(--rule) 82%, transparent);
-  opacity: 0.5;
+  left: 0.45rem;
+  top: 50%;
+  width: calc(var(--wheel-diam, 50%) * 0.1);
+  height: var(--wheel-diam, 50%);
+  margin-top: calc(var(--wheel-diam, 50%) * -0.5);
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 100% 100% at 78% 50%,
+    rgba(154, 59, 44, 0.05) 0%,
+    transparent 64%
+  );
+  box-shadow: inset 4px 0 10px -14px rgba(154, 59, 44, 0.03);
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* 分类节点（始终展开） */
+/* 分类节点（不占流式高度；position:static 让子项相对 .rail-list 定位） */
 .rail-cat {
-  position: relative;
-}
-.rail-cat + .rail-cat {
-  margin-top: 0.1rem;
+  position: static;
+  height: 0;
+  overflow: visible;
+  margin: 0;
+  transform-style: preserve-3d;
 }
 
 /* 分类行：整行可点（点击 → 该栏首项滚到中心） */
@@ -685,28 +673,31 @@ em {
   background: transparent;
   border: none;
   border-bottom: 1px solid var(--rule);
-  padding: 0.55rem 0.2rem 0.55rem 1.4rem;
+  padding: 0.68rem 0.2rem 0.68rem 1.2rem;
   cursor: pointer;
   text-align: left;
   color: var(--ink-soft);
   font-family: var(--serif-body);
-  transition: color 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.45s var(--ease-out), opacity 0.45s var(--ease-out);
-  position: relative;
-  /* 环面立体感：缩放 + 透明度 + 沿弧面倾斜（由 JS 按到中心的弧距设置） */
-  transform: perspective(460px) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease),
+    opacity 0.4s var(--ease-out);
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transform: translateY(-50%) translateZ(var(--node-z, 0px)) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
   opacity: var(--node-opacity, 1);
   transform-origin: left center;
   will-change: transform, opacity;
+  backface-visibility: hidden;
 }
-/* 分类圆点（压在主线上） */
 .rail-cat-btn::before {
   content: "";
   position: absolute;
-  left: 0.18rem;
+  left: 0.05rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 9px;
-  height: 9px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--paper);
   border: 1.5px solid var(--ink-faint);
@@ -729,18 +720,18 @@ em {
 .rail-cat-no {
   font-family: var(--serif-en);
   font-style: italic;
-  font-size: 0.78rem;
+  font-size: 1rem;
   color: var(--accent);
-  min-width: 1.1rem;
+  min-width: 1.25rem;
 }
 .rail-cat-name {
   font-family: var(--serif-en);
   font-weight: 600;
-  font-size: clamp(0.9rem, 1.4vw, 1.05rem);
+  font-size: clamp(1.18rem, 2vw, 1.42rem);
   letter-spacing: 0.01em;
 }
 .rail-cat-sub {
-  font-size: 0.58rem;
+  font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -750,46 +741,52 @@ em {
 .rail-cat-count {
   font-family: var(--serif-en);
   font-style: italic;
-  font-size: 0.7rem;
+  font-size: 0.88rem;
   color: var(--ink-faint);
   min-width: 1.4rem;
   text-align: right;
 }
 
-/* 项目子列表（始终展开） */
+/* 项目子列表（始终展开；流式高度归零，项目由轮盘定位） */
 .rail-items {
   list-style: none;
   margin: 0;
-  padding: 0.2rem 0 0.5rem 0;
+  padding: 0;
+  height: 0;
+  overflow: visible;
+  transform-style: preserve-3d;
 }
 
 .rail-item {
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  padding: 0.28rem 0.6rem 0.28rem 1.7rem;
-  margin: 0.02rem 0;
+  padding: 0.38rem 0.6rem 0.38rem 1.5rem;
+  margin: 0;
   cursor: pointer;
   color: var(--ink-mute);
-  font-size: 0.84rem;
-  border-radius: 1px;
-  position: relative;
-  transition: color 0.35s var(--ease), background 0.35s var(--ease), transform 0.45s var(--ease-out), opacity 0.45s var(--ease-out);
+  font-size: 1.12rem;
+  border-radius: 0;
+  background: transparent;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transition: color 0.35s var(--ease), opacity 0.4s var(--ease-out);
   transform-origin: left center;
-  /* 环面立体感：缩放 + 透明度 + 沿弧面倾斜（由 JS 按弧距设置） */
-  transform: perspective(460px) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
+  transform: translateY(-50%) translateZ(var(--node-z, 0px)) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
   opacity: var(--node-opacity, 1);
   will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
-/* 项目节点圆点（压在主线上） */
 .rail-node {
   position: absolute;
-  left: 0.34rem;
+  left: 0.2rem;
   top: 50%;
   transform: translateY(-50%);
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   background: var(--paper);
   border: 1.5px solid var(--ink-faint);
@@ -798,29 +795,95 @@ em {
 .rail-no {
   font-family: var(--serif-en);
   font-style: italic;
-  font-size: 0.74rem;
+  font-size: 0.96rem;
   color: var(--ink-faint);
-  min-width: 1.5rem;
+  min-width: 1.75rem;
 }
 .rail-name {
   font-family: var(--serif-en);
   font-weight: 500;
+  font-size: 1em;
   letter-spacing: 0.01em;
 }
 
-.rail-item:hover {
+.rail-item:hover:not(.is-active) {
   color: var(--ink);
+}
+.rail-item:hover:not(.is-active)::before {
+  content: "";
+  position: absolute;
+  left: 0.12rem;
+  right: 0.08rem;
+  top: 50%;
+  height: 1.55em;
+  transform: translateY(-50%);
+  border-radius: 0;
+  clip-path: polygon(
+    0% 30%,
+    4% 14%,
+    22% 4%,
+    50% 2%,
+    78% 4%,
+    96% 14%,
+    100% 30%,
+    100% 70%,
+    96% 86%,
+    78% 96%,
+    50% 98%,
+    22% 96%,
+    4% 86%,
+    0% 70%
+  );
   background: rgba(154, 59, 44, 0.04);
+  z-index: -1;
+  pointer-events: none;
 }
 .rail-item:hover .rail-node {
   border-color: var(--accent-soft);
 }
-/* 中心节点：放大 + 强调色 */
+/* 中心节点：圆柱面带 — 左缘贴轮轴，上下鼓起 */
 .rail-item.is-active {
   color: var(--accent);
-  background: rgba(154, 59, 44, 0.07);
   font-weight: 600;
-  font-size: 0.96rem;
+  font-size: 1.28rem;
+}
+.rail-item.is-active::before {
+  content: "";
+  position: absolute;
+  left: 0.1rem;
+  right: 0.06rem;
+  top: 50%;
+  height: 2.05em;
+  transform: translateY(-50%);
+  border-radius: 0;
+  clip-path: polygon(
+    0% 34%,
+    3% 10%,
+    18% 1%,
+    50% 0%,
+    82% 1%,
+    97% 10%,
+    100% 34%,
+    100% 66%,
+    97% 90%,
+    82% 99%,
+    50% 100%,
+    18% 99%,
+    3% 90%,
+    0% 66%
+  );
+  background: linear-gradient(
+    90deg,
+    rgba(154, 59, 44, 0.11) 0%,
+    rgba(154, 59, 44, 0.13) 42%,
+    rgba(154, 59, 44, 0.09) 78%,
+    rgba(154, 59, 44, 0.05) 100%
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(154, 59, 44, 0.1),
+    inset 0 -1px 0 rgba(154, 59, 44, 0.05);
+  z-index: -1;
+  pointer-events: none;
 }
 .rail-item.is-active .rail-node {
   background: var(--accent);
@@ -1404,6 +1467,12 @@ em {
 
   .work-rail {
     order: 1;
+    height: clamp(14rem, 36vh, 20rem);
+    min-height: 14rem;
+  }
+
+  .rail-list {
+    min-height: 100%;
   }
 
   .card-stage {
