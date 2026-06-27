@@ -607,67 +607,76 @@ em {
   overflow: hidden;
 }
 
-/* ──────────────── 左侧：时间轴 ──────────────── */
+/* ──────────────── 左侧：衔尾蛇环（单一连续序列） ──────────────── */
+/* 所有分类 + 项目按一条纵向环面排列；点击任一节点
+   将其滚动到视口中央突出，距中心越远的节点越缩越淡。 */
 .work-rail {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding-right: 0.4rem;
-  /* 整栏透视：让分类栏之间也有环状纵深感 */
-  perspective: 700px;
-  perspective-origin: 50% 50%;
+  overflow: hidden;                 /* 首尾在边缘渐隐，构成环感 */
+  /* 边缘遮罩：与纸色衔接，让环头尾自然淡出 */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+  mask-image: linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%);
+}
+/* 卷边：一条竖向椭圆环，象征整体“卷起来”的环面（衔尾蛇），
+   固定在轨道左侧、不随滚动移动，给节点一个弧形轨道。 */
+.work-rail::before {
+  content: "";
+  position: absolute;
+  left: 0.42rem;
+  top: 9%;
+  bottom: 9%;
+  width: 1.5rem;
+  transform: translateX(-50%);
+  border: 1px solid var(--rule);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(154, 59, 44, 0.025), transparent 62%);
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 0;
 }
 .rail-list {
   list-style: none;
   margin: 0;
   padding: 0;
   position: relative;
+  /* 纵向滚动接管：JS 滚动到目标节点 */
+  overflow-y: auto;
+  overflow-x: hidden;
+  height: 100%;
+  scrollbar-width: none;
+  padding: 40% 0;
+  /* 环面透视：每个节点按其到中心的距离做 rotateX，
+     仿佛贴在卷边的环面上转动 */
+  perspective: 460px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
 }
-/* 纵向时间轴主线 */
+.rail-list::-webkit-scrollbar { width: 0; height: 0; }
+
+/* 纵向时间轴主线：弱化为卷边内侧的极细引导，被环面包裹 */
 .rail-list::before {
   content: "";
   position: absolute;
   left: 0.42rem;
-  top: 0.5rem;
-  bottom: 0.5rem;
+  top: 0;
+  bottom: 0;
   width: 1px;
-  background: linear-gradient(var(--rule), var(--rule) 70%, transparent);
+  background: linear-gradient(transparent, var(--rule) 18%, var(--rule) 82%, transparent);
+  opacity: 0.5;
 }
 
-/* 分类节点（可折叠枝）——整体也按环距做立体感 */
+/* 分类节点（始终展开） */
 .rail-cat {
   position: relative;
-  --cat-scale: 1;
-  --cat-opacity: 1;
-  --cat-y: 0;
-  transform: translateY(var(--cat-y)) scale(var(--cat-scale));
-  opacity: var(--cat-opacity);
-  transform-origin: left center;
-  transition: transform 0.45s var(--ease), opacity 0.45s var(--ease);
 }
 .rail-cat + .rail-cat {
   margin-top: 0.1rem;
 }
-/* 栏间环距：活动栏突出，其余栏缩小渐隐 */
-.rail-cat[data-cat-dist="0"] { --cat-scale: 1.06; --cat-opacity: 1;    }
-.rail-cat[data-cat-dist="1"] { --cat-scale: 0.92; --cat-opacity: 0.55;  }
-.rail-cat[data-cat-dist="2"] { --cat-scale: 0.84; --cat-opacity: 0.35;  }
-.rail-cat[data-cat-dist="3"] { --cat-scale: 0.78; --cat-opacity: 0.2;  }
 
-/* 活动栏：整栏字号放大突出 */
-.rail-cat.is-active-cat .rail-cat-name {
-  font-size: clamp(1.05rem, 1.65vw, 1.22rem);
-}
-.rail-cat.is-active-cat .rail-cat-no {
-  font-size: 0.88rem;
-}
-.rail-cat.is-active-cat .rail-item {
-  font-size: 0.92rem;
-  padding: 0.34rem 0.6rem 0.34rem 1.7rem;
-}
-
-/* 分类行：整行可点 */
+/* 分类行：整行可点（点击 → 该栏首项滚到中心） */
 .rail-cat-btn {
   width: 100%;
   display: flex;
@@ -681,8 +690,13 @@ em {
   text-align: left;
   color: var(--ink-soft);
   font-family: var(--serif-body);
-  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease), transform 0.45s var(--ease-out), opacity 0.45s var(--ease-out);
   position: relative;
+  /* 环面立体感：缩放 + 透明度 + 沿弧面倾斜（由 JS 按到中心的弧距设置） */
+  transform: perspective(460px) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
+  opacity: var(--node-opacity, 1);
+  transform-origin: left center;
+  will-change: transform, opacity;
 }
 /* 分类圆点（压在主线上） */
 .rail-cat-btn::before {
@@ -702,10 +716,11 @@ em {
   color: var(--ink);
   border-bottom-color: var(--ink-soft);
 }
-.rail-cat.is-open .rail-cat-btn {
+/* 当栏下有项目处于中心时，整栏强调 */
+.rail-cat.is-cat-active .rail-cat-btn {
   color: var(--ink);
 }
-.rail-cat.is-open .rail-cat-btn::before {
+.rail-cat.is-cat-active .rail-cat-btn::before {
   border-color: var(--accent);
   background: var(--accent);
   box-shadow: 0 0 0 4px rgba(154, 59, 44, 0.1);
@@ -740,57 +755,12 @@ em {
   min-width: 1.4rem;
   text-align: right;
 }
-.rail-caret {
-  font-family: var(--serif-en);
-  font-weight: 600;
-  font-size: 0.95rem;
-  line-height: 1;
-  color: var(--ink-mute);
-  transition: transform 0.35s var(--ease), color 0.35s var(--ease);
-  display: inline-block;
-  margin-left: 0.15rem;
-}
-.rail-cat.is-open .rail-caret {
-  transform: rotate(45deg);
-  color: var(--accent);
-}
 
-/* 项目子列表（折叠展开：grid-template-rows 动画） */
+/* 项目子列表（始终展开） */
 .rail-items {
   list-style: none;
   margin: 0;
   padding: 0.2rem 0 0.5rem 0;
-  display: grid;
-  grid-template-rows: 1fr;
-  transition: grid-template-rows 0.4s var(--ease);
-  overflow: hidden;
-  /* 环状立体感：给子节点透视 */
-  perspective: 600px;
-  perspective-origin: 50% 50%;
-  position: relative;
-  /* 渐变遮罩与父级纸色衔接，需 isolate 避免遮罩覆盖节点点击 */
-  isolation: isolate;
-}
-/* 首尾半透明衔接遮罩：节点像从环背面转出/转入 */
-.rail-items::before,
-.rail-items::after {
-  content: "";
-  position: absolute;
-  left: 0; right: 0;
-  height: 1.1rem;
-  pointer-events: none;
-  z-index: 4;
-}
-.rail-items::before {
-  top: 0;
-  background: linear-gradient(to bottom, var(--paper), rgba(246,243,236,0.6) 55%, transparent);
-}
-.rail-items::after {
-  bottom: 0;
-  background: linear-gradient(to top, var(--paper), rgba(246,243,236,0.6) 55%, transparent);
-}
-.rail-cat:not(.is-open) .rail-items {
-  grid-template-rows: 0fr;
 }
 
 .rail-item {
@@ -804,24 +774,13 @@ em {
   font-size: 0.84rem;
   border-radius: 1px;
   position: relative;
-  transition: color 0.35s var(--ease), background 0.35s var(--ease), transform 0.45s var(--ease), opacity 0.45s var(--ease);
+  transition: color 0.35s var(--ease), background 0.35s var(--ease), transform 0.45s var(--ease-out), opacity 0.45s var(--ease-out);
   transform-origin: left center;
-  /* 默认（非当前分类 / 未定） */
-  --rail-scale: 1;
-  --rail-y: 0;
-  --rail-rotate: 0deg;
-  --rail-opacity: 1;
-  transform: translateY(var(--rail-y)) scale(var(--rail-scale)) rotate(var(--rail-rotate));
-  opacity: var(--rail-opacity);
+  /* 环面立体感：缩放 + 透明度 + 沿弧面倾斜（由 JS 按弧距设置） */
+  transform: perspective(460px) rotateX(var(--node-rotate, 0deg)) scale(var(--node-scale, 1));
+  opacity: var(--node-opacity, 1);
+  will-change: transform, opacity;
 }
-
-/* 环距立体感：按 data-dist 调整缩放/偏移/透明度，
-   营造节点贴在纵向环面上的视觉，首尾相接处渐隐 */
-.rail-item[data-dist="0"] { --rail-scale: 1.08; --rail-y: 0;    --rail-opacity: 1;    }
-.rail-item[data-dist="1"] { --rail-scale: 0.92; --rail-y: 2px;  --rail-opacity: 0.62; }
-.rail-item[data-dist="2"] { --rail-scale: 0.78; --rail-y: 4px;  --rail-opacity: 0.32; }
-.rail-item[data-dist="3"] { --rail-scale: 0.68; --rail-y: 6px;  --rail-opacity: 0.16; }
-.rail-item[data-dist="x"] { --rail-opacity: 0.55; --rail-scale: 0.96; }   /* 非当前分类节点 */
 
 /* 项目节点圆点（压在主线上） */
 .rail-node {
@@ -852,15 +811,16 @@ em {
 .rail-item:hover {
   color: var(--ink);
   background: rgba(154, 59, 44, 0.04);
-  transform: translateX(2px);
 }
 .rail-item:hover .rail-node {
   border-color: var(--accent-soft);
 }
+/* 中心节点：放大 + 强调色 */
 .rail-item.is-active {
   color: var(--accent);
   background: rgba(154, 59, 44, 0.07);
   font-weight: 600;
+  font-size: 0.96rem;
 }
 .rail-item.is-active .rail-node {
   background: var(--accent);

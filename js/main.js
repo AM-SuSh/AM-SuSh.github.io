@@ -71,6 +71,20 @@
     if (locked) { e.preventDefault(); return; }
     var p = pages[current];
 
+    /* Work 页：鼠标悬停在左侧 rail 时 → 翻项目（不翻页），
+       其余位置 → 正常翻页 */
+    if (current === 1) {
+      if (hoveringRail) {
+        e.preventDefault();
+        var now1 = Date.now();
+        if (now1 - railLock < 150) return;   /* 节流：滚动驱动的弯曲会补足中间帧 */
+        railLock = now1;
+        advance(e.deltaY > 0 ? "next" : "prev");
+        return;
+      }
+      /* 非 rail 区域：继续向下走翻页流程 */
+    }
+
     var now = Date.now();
     // 触控板连续小事件节流
     if (now - lastWheel < 350 && Math.abs(e.deltaY) < 40) {
@@ -168,157 +182,187 @@
     }, { passive: true });
   });
 
-  /* ====================== Work 时间轴 + 详情卡联动 ====================== */
+  /* ====================== Work 衔尾蛇环 + 详情卡联动 ====================== */
   var railCats = Array.prototype.slice.call(document.querySelectorAll(".rail-cat"));
   var railItems = Array.prototype.slice.call(document.querySelectorAll(".rail-item"));
   var cards = Array.prototype.slice.call(document.querySelectorAll(".work-card"));
+  var railList = document.querySelector(".rail-list");
   var stage = document.getElementById("workStage");
   var autoTimer = null;
-  var catIndex = {};   // { ai: 当前显示序号, tools: ..., ... }
-  var activeCat = "ai";
-  var catOrder = railCats.map(function (rc) { return rc.getAttribute("data-cat"); });
 
-  function cardsOf(cat) {
-    return cards.filter(function (c) { return c.getAttribute("data-cat") === cat; });
-  }
-
-  function itemsOf(cat) {
-    return railItems.filter(function (r) {
-      return r.getAttribute("data-id") && r.getAttribute("data-id").indexOf(cat + "-") === 0;
-    });
-  }
-
-  /* 同步时间轴项目节点的高亮 + 环距立体感，并设置分类栏间环距 */
-  function syncRailActive(cat, idx) {
-    var id = cat + "-" + idx;
-    var totalCats = railCats.length;
-
+  /* 把所有分类与项目拍成一条扁平的全局序列（衔尾蛇环）。
+     节点 = rail-items 里的每个项目；分类栏标题作为分段标记。 */
+  var seq = [];
+  railCats.forEach(function (rc) {
+    var cat = rc.getAttribute("data-cat");
+    seq.push({ type: "cat", cat: cat, el: rc });
     railItems.forEach(function (r) {
-      var rid = r.getAttribute("data-id") || "";
-      var isActive = rid === id;
-      r.classList.toggle("is-active", isActive);
-
-      /* 只对当前分类的节点计算环距，其他分类节点置为隐藏态 */
-      var inCat = rid.indexOf(cat + "-") === 0;
-      if (!inCat) {
-        r.setAttribute("data-dist", "x");
-        return;
+      var id = r.getAttribute("data-id") || "";
+      if (id.indexOf(cat + "-") === 0) {
+        seq.push({ type: "item", cat: cat, id: id, el: r });
       }
-      var n = cardsOf(cat).length;
-      var i = parseInt(rid.split("-")[1], 10) || 0;
-      var dist = Math.abs(i - idx);
-      dist = Math.min(dist, n - dist);   /* 环距：考虑首尾相接 */
-      r.setAttribute("data-dist", String(dist));
     });
+  });
+  /* 仅项目节点可被选中（分类标题点击 → 选中该栏首个项目） */
+  var itemSeq = seq.filter(function (s) { return s.type === "item"; });
+  var curIndex = 0;   /* 当前处于环中心的项目序号 */
 
-    /* 分类栏间环距：距当前活动分类越远越缩小渐隐 */
+  function cardById(id) {
+    for (var i = 0; i < cards.length; i++) {
+      if (cards[i].getAttribute("data-id") === id) return cards[i];
+    }
+    return null;
+  }
+  function catOf(id) { return id.split("-")[0]; }
+
+  /* 把项目序号 idx 滚动到环中心。
+     立体感与渐隐由实际的滚动像素位置驱动（连续、丝滑），
+     而非离散台阶；scroll 监听里实时重算。 */
+  function focusItem(idx, dir) {
+    idx = (idx + itemSeq.length) % itemSeq.length;   /* 衔尾蛇：首尾相接 */
+    curIndex = idx;
+    var node = itemSeq[idx].el;
+    var target = itemSeq[idx].id;
+    var activeCat = catOf(target);
+
+    /* —— 高亮（基于序号，确定性强） —— */
+    railItems.forEach(function (r) {
+      var id = r.getAttribute("data-id") || "";
+      var inSeq = -1, k;
+      for (k = 0; k < itemSeq.length; k++) {
+        if (itemSeq[k].id === id) { inSeq = k; break; }
+      }
+      r.classList.toggle("is-active", inSeq === idx);
+    });
     railCats.forEach(function (rc) {
-      var c = rc.getAttribute("data-cat");
-      if (c === cat) {
-        rc.setAttribute("data-cat-dist", "0");
-        return;
-      }
-      var ci = catOrder.indexOf(c);
-      var ai = catOrder.indexOf(cat);
-      if (ci < 0 || ai < 0) { rc.setAttribute("data-cat-dist", "3"); return; }
-      var d = Math.abs(ci - ai);
-      d = Math.min(d, totalCats - d);   /* 首尾相接 */
-      rc.setAttribute("data-cat-dist", String(d));
+      rc.classList.toggle("is-cat-active", rc.getAttribute("data-cat") === activeCat);
     });
+
+    /* —— 滚动：把目标节点居中（smooth 由 CSS / 浏览器接管） —— */
+    if (railList && node) {
+      var railRect = railList.getBoundingClientRect();
+      var nodeRect = node.getBoundingClientRect();
+      var targetTop = railList.scrollTop + (nodeRect.top - railRect.top) - (railRect.height - nodeRect.height) / 2;
+      if (reduceMotion) railList.scrollTop = targetTop;
+      else railList.scrollTo({ top: targetTop, behavior: "smooth" });
+    }
+
+    /* —— 右侧详情卡联动 —— */
+    cards.forEach(function (c) { c.classList.remove("is-on", "flip-next", "flip-prev"); });
+    var card = cardById(target);
+    if (card) {
+      card.classList.add("is-on");
+      card.classList.add(dir === "prev" ? "flip-prev" : "flip-next");
+    }
+    updateCardNav(idx);
   }
 
-  /* 更新详情卡右下角的 位置计数（01 / N） */
-  function updateCardNav(cat, idx) {
+  /* 滚动驱动：按每个节点到视口中心的像素距离，连续地设置
+     缩放 / 透明度 / 倾斜，让整列像卷在弧面上流动。
+     中心 = 最突出（大、不倾斜、不透明），越往两端的节点越往
+     弧面后方倾斜、越缩小越淡。 */
+  var ringTick = null;
+  function scheduleRing() {
+    if (ringTick) return;
+    ringTick = requestAnimationFrame(function () {
+      ringTick = null;
+      applyRing();
+    });
+  }
+  function applyRing() {
+    if (!railList) return;
+    var viewH = railList.clientHeight;
+    var center = viewH / 2;
+    /* 弧面半径（px）：决定从中心到边缘的弯曲强度 */
+    var R = viewH * 0.52;
+    var half = R;   /* 超过此距离视为转到环背面，渐隐 */
+
+    /* 项目节点 */
+    railItems.forEach(function (r) {
+      var rect = r.getBoundingClientRect();
+      var elCenter = rect.top + rect.height / 2 - railList.getBoundingClientRect().top;
+      var d = elCenter - center;                 /* 到中心的像素偏移（带方向） */
+      applyArcStyle(r, d, half);
+    });
+    /* 分类栏标题 */
+    railCats.forEach(function (rc) {
+      var btn = rc.querySelector(".rail-cat-btn");
+      if (!btn) return;
+      var rect = btn.getBoundingClientRect();
+      var elCenter = rect.top + rect.height / 2 - railList.getBoundingClientRect().top;
+      var d = elCenter - center;
+      applyArcStyle(btn, d, half);
+    });
+  }
+  /* 连续映射：t = 归一化距离 [0,1]，离中心越远越淡越倾斜 */
+  function applyArcStyle(el, d, half) {
+    if (!el) return;
+    var ad = Math.abs(d);
+    var t = Math.min(ad / half, 1);              /* 0 中心 → 1 边缘/背面 */
+    /* 用正弦曲线让弯曲更自然：中心变化平缓、边缘加速卷入 */
+    var e = Math.sin(t * Math.PI / 2);
+    var scale = 1 - 0.34 * e;                    /* 1 → 0.66 */
+    var opacity = 1 - 0.88 * Math.pow(t, 1.15);  /* 1 → ~0.12 */
+    var dir = d < 0 ? -1 : 1;                    /* 上方节点向后倾，下方向前 */
+    var rotate = dir * 62 * e;                   /* 0 → ±62deg */
+    el.style.setProperty("--node-scale", scale.toFixed(3));
+    el.style.setProperty("--node-opacity", opacity.toFixed(3));
+    el.style.setProperty("--node-rotate", rotate.toFixed(1) + "deg");
+  }
+
+  /* 滚动时实时重排立体感（rAF 节流） */
+  if (railList) {
+    railList.addEventListener("scroll", function () {
+      if (current === 1) scheduleRing();
+    }, { passive: true });
+  }
+
+  /* 更新详情卡右下角的位置计数 */
+  function updateCardNav(idx) {
     var pos = document.getElementById("cardPos");
     if (!pos) return;
-    var list = cardsOf(cat);
-    var n = list.length;
-    pos.textContent = String(idx + 1).padStart(2, "0") + " / " + n;
+    pos.textContent = String(idx + 1).padStart(2, "0") + " / " + itemSeq.length;
   }
 
-  function showCard(cat, dir, manual) {
-    var list = cardsOf(cat);
-    if (!list.length) return;
-    if (catIndex[cat] === undefined) catIndex[cat] = 0;
-    var idx = catIndex[cat];
-
-    cards.forEach(function (c) { c.classList.remove("is-on", "flip-next", "flip-prev"); });
-    var card = list[idx];
-    card.classList.add("is-on");
-    card.classList.add(dir === "prev" ? "flip-prev" : "flip-next");
-
-    syncRailActive(cat, idx);
-    updateCardNav(cat, idx);
-  }
-
-  function advanceCard(dir) {
-    var list = cardsOf(activeCat);
-    if (!list.length) return;
-    var idx = catIndex[activeCat] || 0;
-    idx = (idx + (dir === "prev" ? -1 : 1) + list.length) % list.length;
-    catIndex[activeCat] = idx;
-    showCard(activeCat, dir, true);
+  function advance(dir) {
+    focusItem(curIndex + (dir === "prev" ? -1 : 1), dir);
     restartAuto();
   }
 
-  /* 手风琴：仅保留一个活动栏，其余折叠 */
-  function setActiveCat(cat) {
-    railCats.forEach(function (rc) {
-      var c = rc.getAttribute("data-cat");
-      var on = c === cat;
-      rc.classList.toggle("is-open", on);
-      rc.classList.toggle("is-active-cat", on);
-      var btn = rc.querySelector(".rail-cat-btn");
-      if (btn) btn.setAttribute("aria-expanded", on ? "true" : "false");
-    });
-  }
-
-  /* 切换活动分类：展开该栏、收起其余，右侧轮播该栏内项目 */
-  function selectCat(cat) {
-    activeCat = cat;
-    catIndex[cat] = catIndex[cat] || 0;
-    setActiveCat(cat);
-    showCard(cat, "next", true);
-    restartAuto();
-  }
-
-  /* 点击项目节点 → 激活该栏并定位详情卡 */
-  function jumpToItem(id) {
-    var parts = id.split("-");
-    var cat = parts[0];
-    var idx = parseInt(parts[1], 10);
-    if (isNaN(idx)) return;
-    activeCat = cat;
-    catIndex[cat] = idx;
-    setActiveCat(cat);
-    showCard(cat, "next", true);
-    restartAuto();
-  }
-
+  /* 用户滚动 rail 时不打断（仅点击 / 自动轮换驱动中心位） */
   function restartAuto() {
     clearInterval(autoTimer);
     if (reduceMotion) return;
     autoTimer = setInterval(function () {
-      if (current === 2) advanceCard("next");
+      if (current === 1) advance("next");   /* 在 Work 页才推进 */
     }, 3000);
   }
 
-  /* 事件绑定：分类标题整行点击 → 切换为活动栏 */
+  /* 事件：分类标题点击 → 该栏首项居中 */
   railCats.forEach(function (rc) {
     var btn = rc.querySelector(".rail-cat-btn");
     if (!btn) return;
     btn.addEventListener("click", function (e) {
       e.stopPropagation();
-      selectCat(rc.getAttribute("data-cat"));
+      var cat = rc.getAttribute("data-cat");
+      var firstIdx = -1, i;
+      for (i = 0; i < itemSeq.length; i++) {
+        if (itemSeq[i].cat === cat) { firstIdx = i; break; }
+      }
+      if (firstIdx >= 0) { focusItem(firstIdx, "next"); restartAuto(); }
     });
   });
 
-  /* 事件绑定：项目节点点击 */
+  /* 事件：项目节点点击 → 该项居中 */
   railItems.forEach(function (r) {
     r.addEventListener("click", function (e) {
       e.stopPropagation();
       var id = r.getAttribute("data-id");
-      if (id) jumpToItem(id);
+      var i;
+      for (i = 0; i < itemSeq.length; i++) {
+        if (itemSeq[i].id === id) { focusItem(i, "next"); break; }
+      }
+      restartAuto();
     });
   });
 
@@ -326,15 +370,25 @@
   if (stage) {
     stage.addEventListener("mouseenter", function () { clearInterval(autoTimer); });
     stage.addEventListener("mouseleave", function () {
-      if (current === 2) restartAuto();
+      if (current === 1) restartAuto();
     });
   }
 
   /* 详情卡导航按钮 */
   var cardPrev = document.getElementById("cardPrev");
   var cardNext = document.getElementById("cardNext");
-  if (cardPrev) cardPrev.addEventListener("click", function (e) { e.stopPropagation(); advanceCard("prev"); });
-  if (cardNext) cardNext.addEventListener("click", function (e) { e.stopPropagation(); advanceCard("next"); });
+  if (cardPrev) cardPrev.addEventListener("click", function (e) { e.stopPropagation(); advance("prev"); });
+  if (cardNext) cardNext.addEventListener("click", function (e) { e.stopPropagation(); advance("next"); });
+
+  /* 滚轮：鼠标悬停在左侧 rail 时 → 翻项目（在全局 wheel 处理中接管）。
+     这里只负责记录悬停状态。 */
+  var rail = document.querySelector(".work-rail");
+  var railLock = 0;
+  var hoveringRail = false;
+  if (rail) {
+    rail.addEventListener("mouseenter", function () { hoveringRail = true; });
+    rail.addEventListener("mouseleave", function () { hoveringRail = false; });
+  }
 
   /* ====================== 初始化 ====================== */
   function init() {
@@ -344,12 +398,23 @@
     });
     syncNav();
     updateProgress();
-    // Work 默认：AI 为唯一活动栏
-    catIndex.ai = 0;
-    setActiveCat("ai");
-    showCard("ai", "next", false);
+    // Work 默认：首个项目居中
+    focusItem(0, "next");
+    // 首屏立体感（无动画，直接落位）
+    requestAnimationFrame(function () { applyRing(); });
   }
   init();
   restartAuto();
+
+  // Work 页激活后稍延迟重排一次立体感（翻页进入时布局刚稳定）
+  var workPage = document.getElementById("work");
+  if (workPage) {
+    var mo = new MutationObserver(function () {
+      if (workPage.classList.contains("is-active")) {
+        setTimeout(function () { applyRing(); }, 60);
+      }
+    });
+    mo.observe(workPage, { attributes: true, attributeFilter: ["class"] });
+  }
 
 })();
