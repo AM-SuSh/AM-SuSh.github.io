@@ -128,3 +128,4 @@ $$
 | 操作系统       | `notes-src/os/`     | `/notes/os/`     |
 | 计算机网络     | `notes-src/networks/` | `/notes/networks/` |
 | 数据结构与算法 | `notes-src/dsa/`    | `/notes/dsa/`    |
+| 分布式计算系统 | `notes-src/distributed/` | `/notes/distributed/` |

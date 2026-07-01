@@ -79,6 +79,10 @@ nav:
       - 树与图: dsa/tree-graph.md
       - 排序与查找: dsa/sort-search.md
       - 算法设计: dsa/design.md
+  - 分布式计算系统:
+      - 概览: distributed/index.md
+      - 导图: distributed/mindmap.md
+      - 课程总结: distributed/summary.md
   - 使用说明:
       - 如何添加笔记: how-to.md
   - 主页 ↩: https://am-sush.github.io

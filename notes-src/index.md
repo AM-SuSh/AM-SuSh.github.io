@@ -40,6 +40,14 @@
 
     [:octicons-arrow-right-24: 阅读](dsa/index.md)
 
+-   :material-share-variant: **分布式计算系统**
+
+    ---
+
+    分布式架构、一致性与协调——思维导图与课程总结（PDF 内嵌阅读）。
+
+    [:octicons-arrow-right-24: 阅读](distributed/index.md)
+
 </div>
 
 ---
