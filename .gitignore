@@ -12,3 +12,9 @@ desktop.ini
 node_modules/
 dist/
 .cache/
+
+# 本地 Python 虚拟环境（笔记站用 conda 环境 am-sush-notes，在仓库之外；
+# 若本地用 venv 建在仓库内，这里兜底忽略）
+.venv/
+.venv-notes/
+__pycache__/

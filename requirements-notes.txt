@@ -1,0 +1,5 @@
+# 课程笔记站依赖 · 用于本地构建与 GitHub Action 重建
+# 本地使用 conda 环境 am-sush-notes (Python 3.11)；Action 用同版本
+mkdocs==1.6.1
+mkdocs-material==9.7.6
+mkdocs-material-extensions==1.3.1

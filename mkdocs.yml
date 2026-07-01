@@ -1,0 +1,134 @@
+# =========================================================================
+# AM-SuSh · 课程笔记站 (MkDocs Material)
+# 部署在 /notes/ 子路径，与根目录主页 (index.html) 共存
+#   主页：https://am-sush.github.io/
+#   笔记：https://am-sush.github.io/notes/
+# =========================================================================
+
+site_name: AM-SuSh · 课程笔记
+site_description: AM-SuSh 的课程笔记——操作系统、计算机网络、数据结构与算法。在线阅读，无需下载。
+site_url: https://am-sush.github.io/notes
+
+# 源在 notes-src/，构建产物输出到 notes/（Pages 直接发布该目录）
+docs_dir: notes-src
+site_dir: notes
+
+# 子路径部署的关键：让站内链接全部带 /notes/ 前缀
+# （site_url 末尾的 /notes 会被 Material 用于生成绝对路径）
+use_directory_urls: true
+
+# 不显示右上角 GitHub 仓库链接（保留 social 链接即可）
+# repo_url: https://github.com/AM-SuSh/AM-SuSh.github.io
+# repo_name: AM-SuSh/AM-SuSh.github.io
+
+# ── 主题：呼应主页的留白衬线杂志风 ──
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.sections      # 左侧栏按课程分组（点击展开章节）
+    - navigation.indexes       # section 首页可点
+    - navigation.top           # 回到顶部
+    - navigation.tracking      # URL 随锚点变化
+    - search.suggest           # 搜索建议
+    - search.highlight         # 搜索高亮
+    - content.code.copy        # 代码一键复制
+    - content.code.annotate    # 代码注解
+    - toc.follow               # 侧边目录跟随
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: journal-paper
+      primary: stamp           # 印章红
+      accent: ink-blue         # 深蓝
+      toggle:
+        icon: material/weather-night
+        name: 切换深色
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: stamp
+      accent: ink-blue
+      toggle:
+        icon: material/weather-sunny
+        name: 切换浅色
+  font:
+    text: Noto Serif SC        # 中文衬线，呼应主页
+    code: JetBrains Mono
+  favicon: ../assets/favicon.svg
+  icon:
+    logo: material/book-open-variant
+
+# ── 导航（左侧栏：所有章节直接可见）──
+nav:
+  - 首页: index.md
+  - 操作系统:
+      - 概览: os/index.md
+      - 进程与线程: os/process-thread.md
+      - CPU 调度: os/scheduling.md
+      - 内存管理: os/memory.md
+      - 并发与同步: os/concurrency.md
+      - 文件系统: os/filesystem.md
+  - 计算机网络:
+      - 概览: networks/index.md
+      - 物理层 / 数据链路层: networks/physical-link.md
+      - 网络层: networks/network-layer.md
+      - 传输层: networks/transport-layer.md
+      - 应用层: networks/application-layer.md
+  - 数据结构与算法:
+      - 概览: dsa/index.md
+      - 线性结构: dsa/linear.md
+      - 树与图: dsa/tree-graph.md
+      - 排序与查找: dsa/sort-search.md
+      - 算法设计: dsa/design.md
+  - 使用说明:
+      - 如何添加笔记: how-to.md
+  - 主页 ↩: https://am-sush.github.io
+
+# ── Markdown 扩展 ──
+markdown_extensions:
+  - admonition                 # 提示框
+  - pymdownx.details           # 可折叠
+  - pymdownx.superfences       # 增强代码块
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite      # 行内代码高亮
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.arithmatex:       # 数学公式
+      generic: true
+  - attr_list                  # 允许给元素加属性（iframe 等）
+  - md_in_html                 # 允许 md 嵌入 html
+  - def_list
+  - footnotes
+  - tables
+  - toc:
+      permalink: "#"
+
+# ── 插件 ──
+plugins:
+  - search:
+      lang:
+        - zh
+        - en
+
+# ── 数学公式渲染 ──
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+# ── 自定义主题色：映射主页的纸张色 / 印章红 / 深蓝 ──
+extra_css:
+  - stylesheets/journal.css
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/AM-SuSh
+      name: GitHub
+    - icon: fontawesome/solid/globe
+      link: https://am-sush.github.io
+      name: 个人主页
