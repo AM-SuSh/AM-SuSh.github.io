@@ -18,3 +18,6 @@ dist/
 .venv/
 .venv-notes/
 __pycache__/
+
+# MkDocs 构建产物（由 GitHub Actions 自动构建并提交；本地勿跟踪）
+notes/

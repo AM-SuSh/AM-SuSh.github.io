@@ -9,7 +9,7 @@ site_name: AM-SuSh · 课程笔记
 site_description: AM-SuSh 的课程笔记——操作系统、计算机网络、数据结构与算法。在线阅读，无需下载。
 site_url: https://am-sush.github.io/notes
 
-# 源在 notes-src/，构建产物输出到 notes/（Pages 直接发布该目录）
+# 源在 notes-src/；构建产物 notes/ 由 GitHub Actions 自动提交，本地不纳入 git
 docs_dir: notes-src
 site_dir: notes
 

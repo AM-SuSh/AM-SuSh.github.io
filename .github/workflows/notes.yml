@@ -1,7 +1,7 @@
 # =========================================================================
 # 课程笔记站自动重建
-# 触发：当 notes-src/、mkdocs.yml、requirements-notes.txt 有改动并 push 到 main
-# 行为：重建 notes/ 并提交回 main —— 只动 notes/，绝不触碰根目录主页
+# 触发：notes-src/、mkdocs.yml、requirements-notes.txt 有改动并 push 到 main
+# 行为：重建 notes/ 并强制提交回 main（notes/ 在 .gitignore，需 git add -f）
 # =========================================================================
 name: Rebuild Notes Site
 
@@ -53,7 +53,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add notes/
+          git add -f notes/
           if git diff --cached --quiet; then
             echo "notes/ 无变化，跳过提交"
           else

@@ -1,7 +1,12 @@
 # 如何添加笔记
 
 本站用 [MkDocs Material](https://squidfunk.github.io/mkdocs-material/) 构建。
-笔记源文件在仓库的 `notes-src/` 目录，构建产物输出到 `notes/`（GitHub Pages 直接发布）。
+笔记源文件在 `notes-src/`；构建产物 `notes/` **由 GitHub Actions 自动提交**，本地无需、也不应把 `notes/` 加入 git。
+
+!!! info "日常只需提交"
+    - `notes-src/` 里的 Markdown、PDF 等资源
+    - `mkdocs.yml`（改了导航或配置时）
+    - push 后约 1 分钟，CI 会自动重建并上传 `notes/`
 
 ---
 
