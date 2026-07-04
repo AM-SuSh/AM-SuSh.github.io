@@ -91,9 +91,17 @@ body,
   font-weight: 600;
 }
 
-/* iframe（PDF 内嵌）边框统一 */
-.md-typeset iframe {
+/* iframe / object（PDF 内嵌）边框与响应式 */
+.md-typeset iframe,
+.md-typeset object {
   border-radius: 6px;
+  max-width: 100%;
+}
+@media (max-width: 768px) {
+  .md-typeset iframe[type="application/pdf"],
+  .md-typeset object[type="application/pdf"] {
+    height: 480px !important;
+  }
 }
 
 /* 主页卡片网格底色微调，更贴合纸张 */
