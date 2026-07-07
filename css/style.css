@@ -525,57 +525,247 @@ em {
 
 
 /* =========================================================================
-   ABOUT
+   ABOUT · 时间轴回忆录
    ========================================================================= */
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: clamp(2rem, 6vw, 5rem);
-  align-items: start;
+.tl-wrap {
   flex: 1;
+  padding-bottom: 4rem;
 }
 
-.about-lede {
+.tl-heading {
   font-family: var(--serif-en);
   font-weight: 500;
-  font-size: clamp(2.2rem, 5vw, 4rem);
-  line-height: 1.08;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
+  line-height: 1.15;
   letter-spacing: -0.02em;
+  margin-bottom: clamp(2.5rem, 5vh, 4rem);
+  text-align: center;
 }
+.tl-heading em { color: var(--accent); font-weight: 500; }
 
-.about-lede em {
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.about-text {
-  padding-top: 0.6rem;
-}
-
-.about-text p {
-  margin-bottom: 1.4rem;
-}
-
-.about-text .zh {
-  font-family: var(--serif-zh);
-  font-size: 1.02rem;
-  line-height: 2;
-  color: var(--ink-soft);
-  letter-spacing: 0.04em;
-}
-
-.dropcap-en {
+/* ── 时间轴容器 ── */
+.timeline {
+  --tl-off: -2rem;
   position: relative;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.5rem 0 2rem 2.5rem;
 }
 
-.dropcap {
-  float: left;
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--rule);
+}
+
+.tl-line {
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  width: 1px;
+  height: 0;
+  background: linear-gradient(180deg, var(--accent) 60%, var(--accent-soft));
+  z-index: 1;
+  pointer-events: none;
+}
+.tl-line::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  transform: translateX(-50%);
+  box-shadow: 0 0 6px rgba(154, 59, 44, 0.4);
+}
+
+/* ── 年份标记 ── */
+.tl-year {
+  position: relative;
+  margin: 2.5rem 0 1.5rem;
+}
+.tl-line + .tl-year { margin-top: 0; }
+.tl-year span {
   font-family: var(--serif-en);
-  font-weight: 700;
-  font-size: 4.2rem;
-  line-height: 0.82;
-  padding: 0.3rem 0.7rem 0 0;
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
   color: var(--accent);
+  letter-spacing: -0.01em;
+}
+.tl-year::before {
+  content: "";
+  position: absolute;
+  left: var(--tl-off);
+  top: 50%;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2.5px solid var(--paper);
+  box-shadow: 0 0 0 3px rgba(154, 59, 44, 0.12);
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+/* ── 记忆节点 ── */
+.tl-entry {
+  position: relative;
+  margin-bottom: 3rem;
+}
+
+.tl-dot {
+  position: absolute;
+  left: var(--tl-off);
+  top: 0.35rem;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-faint);
+  background: var(--paper);
+  transform: translateX(-50%);
+  z-index: 2;
+  transition: all 0.5s var(--ease);
+}
+.tl-entry.is-visible .tl-dot {
+  border-color: var(--accent);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(154, 59, 44, 0.1);
+}
+
+.tl-time {
+  display: block;
+  font-family: var(--serif-en);
+  font-style: italic;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin-bottom: 0.3rem;
+}
+
+.tl-title {
+  font-family: var(--serif-en);
+  font-weight: 600;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+}
+
+.tl-desc {
+  font-family: var(--serif-zh);
+  font-size: 0.98rem;
+  line-height: 1.9;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  max-width: 52ch;
+  margin-bottom: 0.5rem;
+}
+
+/* ── 轮播图 / 媒体 ── */
+.tl-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: 2px;
+  margin-top: 1rem;
+  border: 1px solid var(--rule);
+  background: var(--paper-edge);
+}
+
+.tl-slides {
+  display: flex;
+  transition: transform 0.55s var(--ease-out);
+  will-change: transform;
+}
+
+.tl-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+}
+
+.tl-slide img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  aspect-ratio: 16 / 10;
+}
+
+.tl-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.2rem;
+  height: 2.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(28, 26, 23, 0.35);
+  color: #fff;
+  font-family: var(--serif-en);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.35s var(--ease), background 0.35s var(--ease);
+  z-index: 3;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.tl-media:hover .tl-arrow { opacity: 1; }
+.tl-arrow:hover { background: rgba(28, 26, 23, 0.6); }
+.tl-arrow--prev { left: 0.6rem; }
+.tl-arrow--next { right: 0.6rem; }
+
+.tl-indicators {
+  position: absolute;
+  bottom: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.4rem;
+  z-index: 3;
+}
+
+.tl-ind {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.35s var(--ease);
+}
+.tl-ind.is-active {
+  background: #fff;
+  transform: scale(1.35);
+}
+
+/* ── 视频 ── */
+.tl-media--video video,
+.tl-media--video iframe {
+  width: 100%;
+  display: block;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+}
+
+/* ── 滚动揭示动效 ── */
+.tl-reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+}
+.tl-reveal.is-visible {
+  opacity: 1;
+  transform: none;
 }
 
 
@@ -1412,7 +1602,8 @@ em {
 
   .page,
   [data-reveal],
-  .reveal-up {
+  .reveal-up,
+  .tl-reveal {
     opacity: 1 !important;
     transform: none !important;
   }
@@ -1441,13 +1632,8 @@ em {
     color: var(--ink-faint);
   }
 
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-
-  .about-lede {
-    font-size: clamp(2rem, 8vw, 3rem);
+  .tl-heading {
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
   }
 
   .skill-row {
@@ -1523,6 +1709,18 @@ em {
   .skill-cell img {
     width: 2rem;
     height: 2rem;
+  }
+
+  .timeline {
+    --tl-off: -1.5rem;
+    padding-left: 2rem;
+  }
+  .timeline::before,
+  .tl-line {
+    left: 0.5rem;
+  }
+  .tl-arrow {
+    opacity: 1;
   }
 
   .contact-grid {

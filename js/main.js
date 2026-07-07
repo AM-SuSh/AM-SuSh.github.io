@@ -489,4 +489,107 @@
     mo.observe(workPage, { attributes: true, attributeFilter: ["class"] });
   }
 
+  /* ====================== About · 时间轴 ====================== */
+  var aboutPage = document.getElementById("about");
+  var tlFlow = document.getElementById("tlFlow");
+  var timelineEl = document.getElementById("timeline");
+  var tlReveals = Array.prototype.slice.call(document.querySelectorAll(".tl-reveal"));
+
+  function updateFlowLine() {
+    if (!aboutPage || !tlFlow || !timelineEl) return;
+    if (!aboutPage.classList.contains("is-active")) return;
+    var pageRect = aboutPage.getBoundingClientRect();
+    var tlRect = timelineEl.getBoundingClientRect();
+    var readPoint = pageRect.top + pageRect.height * 0.45;
+    var progress = Math.max(0, (readPoint - tlRect.top) / tlRect.height);
+    progress = Math.min(1, progress);
+    tlFlow.style.height = (progress * tlRect.height) + "px";
+  }
+
+  function checkTlReveals() {
+    if (!aboutPage || !aboutPage.classList.contains("is-active")) return;
+    var pageRect = aboutPage.getBoundingClientRect();
+    var triggerY = pageRect.bottom - pageRect.height * 0.12;
+    var delay = 0;
+    tlReveals.forEach(function (el) {
+      if (el.classList.contains("is-visible")) return;
+      var rect = el.getBoundingClientRect();
+      if (rect.top < triggerY) {
+        el.style.transitionDelay = (delay * 90) + "ms";
+        el.classList.add("is-visible");
+        delay++;
+      }
+    });
+  }
+
+  if (aboutPage) {
+    aboutPage.addEventListener("scroll", function () {
+      updateFlowLine();
+      checkTlReveals();
+    }, { passive: true });
+
+    var aboutMo = new MutationObserver(function () {
+      if (aboutPage.classList.contains("is-active")) {
+        tlReveals.forEach(function (el) {
+          el.classList.remove("is-visible");
+          el.style.transitionDelay = "";
+        });
+        if (tlFlow) tlFlow.style.height = "0";
+        setTimeout(function () {
+          checkTlReveals();
+          updateFlowLine();
+        }, 80);
+      }
+    });
+    aboutMo.observe(aboutPage, { attributes: true, attributeFilter: ["class"] });
+  }
+
+  /* ── 轮播图 ── */
+  document.querySelectorAll("[data-carousel]").forEach(function (carousel) {
+    var track = carousel.querySelector(".tl-slides");
+    var slides = Array.prototype.slice.call(carousel.querySelectorAll(".tl-slide"));
+    var prevBtn = carousel.querySelector(".tl-arrow--prev");
+    var nextBtn = carousel.querySelector(".tl-arrow--next");
+    var dotsWrap = carousel.querySelector(".tl-indicators");
+    if (!track || slides.length < 2) {
+      if (prevBtn) prevBtn.style.display = "none";
+      if (nextBtn) nextBtn.style.display = "none";
+      return;
+    }
+    var cur = 0;
+    var total = slides.length;
+    var i;
+
+    for (i = 0; i < total; i++) {
+      var dot = document.createElement("button");
+      dot.className = "tl-ind" + (i === 0 ? " is-active" : "");
+      dot.setAttribute("aria-label", "\u7b2c " + (i + 1) + " \u5f20");
+      dot.setAttribute("data-idx", String(i));
+      dotsWrap.appendChild(dot);
+    }
+
+    function slideTo(idx) {
+      cur = ((idx % total) + total) % total;
+      track.style.transform = "translateX(" + (-cur * 100) + "%)";
+      var dots = dotsWrap.querySelectorAll(".tl-ind");
+      dots.forEach(function (d, j) { d.classList.toggle("is-active", j === cur); });
+    }
+
+    prevBtn.addEventListener("click", function (e) { e.stopPropagation(); slideTo(cur - 1); });
+    nextBtn.addEventListener("click", function (e) { e.stopPropagation(); slideTo(cur + 1); });
+    dotsWrap.addEventListener("click", function (e) {
+      var idx = e.target.getAttribute("data-idx");
+      if (idx !== null) slideTo(parseInt(idx, 10));
+    });
+
+    var sx = null;
+    track.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    track.addEventListener("touchend", function (e) {
+      if (sx === null) return;
+      var dx = sx - e.changedTouches[0].clientX;
+      if (Math.abs(dx) > 40) slideTo(dx > 0 ? cur + 1 : cur - 1);
+      sx = null;
+    }, { passive: true });
+  });
+
 })();
