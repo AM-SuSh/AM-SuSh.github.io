@@ -85,6 +85,22 @@
       /* 非 rail 区域：继续向下走翻页流程 */
     }
 
+    /* About 页：仅当鼠标在轨道上时，滚轮 → 横向滚动时间轴 */
+    if (current === 3 && tlTrack) {
+      var tRect = tlTrack.getBoundingClientRect();
+      var overTl = e.clientX >= tRect.left && e.clientX <= tRect.right
+                && e.clientY >= tRect.top  && e.clientY <= tRect.bottom;
+      if (overTl) {
+        var tlAtEnd = tlTrack.scrollLeft + tlTrack.clientWidth >= tlTrack.scrollWidth - 2;
+        var tlAtStart = tlTrack.scrollLeft <= 2;
+        if ((e.deltaY > 0 && !tlAtEnd) || (e.deltaY < 0 && !tlAtStart)) {
+          e.preventDefault();
+          tlTrack.scrollLeft += e.deltaY;
+          return;
+        }
+      }
+    }
+
     var now = Date.now();
     // 触控板连续小事件节流
     if (now - lastWheel < 350 && Math.abs(e.deltaY) < 40) {
@@ -489,32 +505,38 @@
     mo.observe(workPage, { attributes: true, attributeFilter: ["class"] });
   }
 
-  /* ====================== About · 时间轴 ====================== */
+  /* ====================== About · 紧凑时间轴 + 弹出卡片 ====================== */
   var aboutPage = document.getElementById("about");
-  var tlFlow = document.getElementById("tlFlow");
-  var timelineEl = document.getElementById("timeline");
+  var timeline  = document.getElementById("timeline");
+  var tlFlow    = document.getElementById("tlFlow");
+  var tlTrack   = document.getElementById("tlTrack");
   var tlReveals = Array.prototype.slice.call(document.querySelectorAll(".tl-reveal"));
+  var tlMemCols = Array.prototype.slice.call(document.querySelectorAll(".tl-col[data-card]"));
+  var tlCards   = Array.prototype.slice.call(document.querySelectorAll(".tl-card[data-pos]"));
+  var tlOpenIdx = null;
 
+  /* ── 流动线 ── */
   function updateFlowLine() {
-    if (!aboutPage || !tlFlow || !timelineEl) return;
-    if (!aboutPage.classList.contains("is-active")) return;
-    var pageRect = aboutPage.getBoundingClientRect();
-    var tlRect = timelineEl.getBoundingClientRect();
-    var readPoint = pageRect.top + pageRect.height * 0.45;
-    var progress = Math.max(0, (readPoint - tlRect.top) / tlRect.height);
-    progress = Math.min(1, progress);
-    tlFlow.style.height = (progress * tlRect.height) + "px";
+    if (!tlTrack || !tlFlow) return;
+    var sw = tlTrack.scrollWidth;
+    var cw = tlTrack.clientWidth;
+    var sl = tlTrack.scrollLeft;
+    var maxS = sw - cw;
+    if (maxS <= 0) { tlFlow.style.width = sw + "px"; return; }
+    var p = sl / maxS;
+    tlFlow.style.width = (cw * 0.35 + p * (sw - cw * 0.35)) + "px";
   }
 
+  /* ── 揭示 ── */
   function checkTlReveals() {
     if (!aboutPage || !aboutPage.classList.contains("is-active")) return;
-    var pageRect = aboutPage.getBoundingClientRect();
-    var triggerY = pageRect.bottom - pageRect.height * 0.12;
+    if (!tlTrack) return;
+    var trackRect = tlTrack.getBoundingClientRect();
+    var triggerX = trackRect.right - trackRect.width * 0.08;
     var delay = 0;
     tlReveals.forEach(function (el) {
       if (el.classList.contains("is-visible")) return;
-      var rect = el.getBoundingClientRect();
-      if (rect.top < triggerY) {
+      if (el.getBoundingClientRect().left < triggerX) {
         el.style.transitionDelay = (delay * 90) + "ms";
         el.classList.add("is-visible");
         delay++;
@@ -522,19 +544,136 @@
     });
   }
 
-  if (aboutPage) {
-    aboutPage.addEventListener("scroll", function () {
+  /* ── 弹出卡片：关闭 ── */
+  function closeTlCard() {
+    if (tlOpenIdx === null) return;
+    var card = document.getElementById("tl-c-" + tlOpenIdx);
+    if (card) {
+      card.classList.remove("is-open");
+      card.setAttribute("aria-hidden", "true");
+    }
+    var col = document.querySelector('.tl-col[data-card="' + tlOpenIdx + '"]');
+    if (col) col.classList.remove("is-active");
+    tlOpenIdx = null;
+  }
+
+  /* ── 弹出卡片：打开（fixed 定位，用视口坐标） ── */
+  function openTlCard(idx) {
+    closeTlCard();
+    var col  = document.querySelector('.tl-col[data-card="' + idx + '"]');
+    var card = document.getElementById("tl-c-" + idx);
+    if (!col || !card) return;
+
+    var node = col.querySelector(".tl-node-mem");
+    if (!node) return;
+    var pos = col.getAttribute("data-pos");
+    var nodeRect = node.getBoundingClientRect();
+    var vw = window.innerWidth;
+    var vh = window.innerHeight;
+
+    var cardW = card.offsetWidth || 260;
+    var cx = nodeRect.left + nodeRect.width / 2;
+    var left = cx - cardW / 2;
+    left = Math.max(8, Math.min(left, vw - cardW - 8));
+    card.style.left = left + "px";
+
+    var stemX = cx - left;
+    card.style.setProperty("--stem-x", stemX + "px");
+
+    var gap = 14;
+    if (pos === "up") {
+      var top = nodeRect.top - gap;
+      card.style.bottom = (vh - top) + "px";
+      card.style.top = "auto";
+    } else {
+      card.style.top = (nodeRect.bottom + gap) + "px";
+      card.style.bottom = "auto";
+    }
+
+    card.classList.add("is-open");
+    card.setAttribute("aria-hidden", "false");
+    col.classList.add("is-active");
+    tlOpenIdx = idx;
+  }
+
+  /* ── 节点点击 ── */
+  tlMemCols.forEach(function (col) {
+    var node = col.querySelector(".tl-node-mem");
+    if (!node) return;
+    var idx = col.getAttribute("data-card");
+    node.addEventListener("click", function (e) {
+      e.stopPropagation();
+      if (tlOpenIdx === idx) { closeTlCard(); } else { openTlCard(idx); }
+    });
+    node.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (tlOpenIdx === idx) { closeTlCard(); } else { openTlCard(idx); }
+      }
+    });
+  });
+
+  /* ── 关闭卡片的关闭按钮 ── */
+  tlCards.forEach(function (card) {
+    var btn = card.querySelector(".tl-card-close");
+    if (btn) btn.addEventListener("click", function (e) { e.stopPropagation(); closeTlCard(); });
+  });
+
+  /* ── 点击外部关闭 ── */
+  document.addEventListener("click", function (e) {
+    if (tlOpenIdx === null) return;
+    var card = document.getElementById("tl-c-" + tlOpenIdx);
+    if (card && !card.contains(e.target) && !e.target.closest(".tl-node-mem")) {
+      closeTlCard();
+    }
+  });
+
+  /* ── Escape 关闭 ── */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && tlOpenIdx !== null) closeTlCard();
+  });
+
+  /* ── 轨道滚动 → 关闭 + 更新 ── */
+  if (tlTrack) {
+    tlTrack.addEventListener("scroll", function () {
+      closeTlCard();
       updateFlowLine();
       checkTlReveals();
     }, { passive: true });
 
+    /* 拖拽横向滚动 */
+    var isDragging = false, dragStartX = 0, dragScrollLeft = 0;
+    tlTrack.addEventListener("mousedown", function (e) {
+      if (e.target.closest(".tl-arrow, .tl-ind, button, a, video")) return;
+      isDragging = true;
+      dragStartX = e.pageX;
+      dragScrollLeft = tlTrack.scrollLeft;
+      tlTrack.style.scrollBehavior = "auto";
+    });
+    window.addEventListener("mousemove", function (e) {
+      if (!isDragging) return;
+      e.preventDefault();
+      tlTrack.scrollLeft = dragScrollLeft - (e.pageX - dragStartX);
+    });
+    window.addEventListener("mouseup", function () {
+      if (!isDragging) return;
+      isDragging = false;
+      tlTrack.style.scrollBehavior = "";
+    });
+  }
+
+  /* ── 页面切换时重置 ── */
+  if (aboutPage) {
     var aboutMo = new MutationObserver(function () {
       if (aboutPage.classList.contains("is-active")) {
+        closeTlCard();
         tlReveals.forEach(function (el) {
           el.classList.remove("is-visible");
           el.style.transitionDelay = "";
         });
-        if (tlFlow) tlFlow.style.height = "0";
+        if (tlFlow) tlFlow.style.width = "0";
+        if (tlTrack) tlTrack.scrollLeft = 0;
         setTimeout(function () {
           checkTlReveals();
           updateFlowLine();
@@ -546,12 +685,12 @@
 
   /* ── 轮播图 ── */
   document.querySelectorAll("[data-carousel]").forEach(function (carousel) {
-    var track = carousel.querySelector(".tl-slides");
+    var cTrack = carousel.querySelector(".tl-slides");
     var slides = Array.prototype.slice.call(carousel.querySelectorAll(".tl-slide"));
     var prevBtn = carousel.querySelector(".tl-arrow--prev");
     var nextBtn = carousel.querySelector(".tl-arrow--next");
     var dotsWrap = carousel.querySelector(".tl-indicators");
-    if (!track || slides.length < 2) {
+    if (!cTrack || slides.length < 2) {
       if (prevBtn) prevBtn.style.display = "none";
       if (nextBtn) nextBtn.style.display = "none";
       return;
@@ -570,7 +709,7 @@
 
     function slideTo(idx) {
       cur = ((idx % total) + total) % total;
-      track.style.transform = "translateX(" + (-cur * 100) + "%)";
+      cTrack.style.transform = "translateX(" + (-cur * 100) + "%)";
       var dots = dotsWrap.querySelectorAll(".tl-ind");
       dots.forEach(function (d, j) { d.classList.toggle("is-active", j === cur); });
     }
@@ -583,8 +722,8 @@
     });
 
     var sx = null;
-    track.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
-    track.addEventListener("touchend", function (e) {
+    cTrack.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    cTrack.addEventListener("touchend", function (e) {
       if (sx === null) return;
       var dx = sx - e.changedTouches[0].clientX;
       if (Math.abs(dx) > 40) slideTo(dx > 0 ? cur + 1 : cur - 1);

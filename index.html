@@ -466,128 +466,93 @@
         <h2 class="tl-heading">Moments worth <em>keeping</em>.</h2>
 
         <div class="timeline" id="timeline">
-          <div class="tl-line" id="tlFlow" aria-hidden="true"></div>
+          <!-- 紧凑轨道：仅年份 + 关键点 -->
+          <div class="tl-track" id="tlTrack">
+            <div class="tl-flow" id="tlFlow" aria-hidden="true"></div>
 
-          <!-- ── 2022 ── -->
-          <div class="tl-year tl-reveal"><span>2022</span></div>
+            <div class="tl-col tl-col--year tl-reveal"><span class="tl-year-h">2022</span><div class="tl-node-h tl-node-h--yr"></div></div>
+            <div class="tl-col tl-reveal" data-pos="up" data-card="0"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">09</span></div>
 
-          <article class="tl-entry tl-reveal">
+            <div class="tl-col tl-col--year tl-reveal"><span class="tl-year-h">2023</span><div class="tl-node-h tl-node-h--yr"></div></div>
+            <div class="tl-col tl-reveal" data-pos="down" data-card="1"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">03</span></div>
+            <div class="tl-col tl-reveal" data-pos="up" data-card="2"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">10</span></div>
+
+            <div class="tl-col tl-col--year tl-reveal"><span class="tl-year-h">2024</span><div class="tl-node-h tl-node-h--yr"></div></div>
+            <div class="tl-col tl-reveal" data-pos="down" data-card="3"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">06</span></div>
+
+            <div class="tl-col tl-col--year tl-reveal"><span class="tl-year-h">2025</span><div class="tl-node-h tl-node-h--yr"></div></div>
+            <div class="tl-col tl-reveal" data-pos="up" data-card="4"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">01</span></div>
+
+            <div class="tl-col tl-col--year tl-reveal"><span class="tl-year-h">2026</span><div class="tl-node-h tl-node-h--yr"></div></div>
+            <div class="tl-col tl-reveal" data-pos="down" data-card="5"><div class="tl-node-h tl-node-mem" role="button" tabindex="0"></div><span class="tl-label">至今</span></div>
+          </div>
+
+          <!-- 弹出详情卡片（点击节点后显示） -->
+          <article class="tl-card" id="tl-c-0" data-pos="up">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2022 · 09</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">故事的起点</h3>
-              <p class="tl-desc">在这里写下你的第一段回忆。<br />替换这段文字，记录属于你的时刻。</p>
-              <div class="tl-media" data-carousel>
-                <div class="tl-slides">
-                  <div class="tl-slide"><img src="https://picsum.photos/seed/m1/640/400" alt="回忆" loading="lazy" /></div>
-                  <div class="tl-slide"><img src="https://picsum.photos/seed/m2/640/400" alt="回忆" loading="lazy" /></div>
-                  <div class="tl-slide"><img src="https://picsum.photos/seed/m3/640/400" alt="回忆" loading="lazy" /></div>
-                </div>
-                <button class="tl-arrow tl-arrow--prev" aria-label="上一张">&#8249;</button>
-                <button class="tl-arrow tl-arrow--next" aria-label="下一张">&#8250;</button>
-                <div class="tl-indicators"></div>
+            <h3 class="tl-title">故事的起点</h3>
+            <p class="tl-desc">在这里写下你的第一段回忆。替换文字，记录属于你的时刻。</p>
+            <div class="tl-media" data-carousel>
+              <div class="tl-slides">
+                <div class="tl-slide"><img src="https://picsum.photos/seed/m1/640/400" alt="回忆" loading="lazy" /></div>
+                <div class="tl-slide"><img src="https://picsum.photos/seed/m2/640/400" alt="回忆" loading="lazy" /></div>
+                <div class="tl-slide"><img src="https://picsum.photos/seed/m3/640/400" alt="回忆" loading="lazy" /></div>
               </div>
+              <button class="tl-arrow tl-arrow--prev" aria-label="上一张">&#8249;</button>
+              <button class="tl-arrow tl-arrow--next" aria-label="下一张">&#8250;</button>
+              <div class="tl-indicators"></div>
             </div>
           </article>
 
-          <!-- ── 2023 ── -->
-          <div class="tl-year tl-reveal"><span>2023</span></div>
-
-          <article class="tl-entry tl-reveal">
+          <article class="tl-card" id="tl-c-1" data-pos="down">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2023 · 03</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">又一段旅程</h3>
-              <p class="tl-desc">这里是另一段回忆。可以只放文字，也可以搭配图片轮播。</p>
-            </div>
+            <h3 class="tl-title">又一段旅程</h3>
+            <p class="tl-desc">这里是另一段回忆。可以只放文字，也可以搭配图片轮播。</p>
           </article>
 
-          <article class="tl-entry tl-reveal">
+          <article class="tl-card" id="tl-c-2" data-pos="up">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2023 · 10</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">深秋的记忆</h3>
-              <p class="tl-desc">同一年可以添加多个记忆节点。</p>
-              <div class="tl-media" data-carousel>
-                <div class="tl-slides">
-                  <div class="tl-slide"><img src="https://picsum.photos/seed/m4/640/400" alt="回忆" loading="lazy" /></div>
-                  <div class="tl-slide"><img src="https://picsum.photos/seed/m5/640/400" alt="回忆" loading="lazy" /></div>
-                </div>
-                <button class="tl-arrow tl-arrow--prev" aria-label="上一张">&#8249;</button>
-                <button class="tl-arrow tl-arrow--next" aria-label="下一张">&#8250;</button>
-                <div class="tl-indicators"></div>
+            <h3 class="tl-title">深秋的记忆</h3>
+            <p class="tl-desc">同一年可以添加多个记忆节点。</p>
+            <div class="tl-media" data-carousel>
+              <div class="tl-slides">
+                <div class="tl-slide"><img src="https://picsum.photos/seed/m4/640/400" alt="回忆" loading="lazy" /></div>
+                <div class="tl-slide"><img src="https://picsum.photos/seed/m5/640/400" alt="回忆" loading="lazy" /></div>
               </div>
+              <button class="tl-arrow tl-arrow--prev" aria-label="上一张">&#8249;</button>
+              <button class="tl-arrow tl-arrow--next" aria-label="下一张">&#8250;</button>
+              <div class="tl-indicators"></div>
             </div>
           </article>
 
-          <!-- ── 2024 ── -->
-          <div class="tl-year tl-reveal"><span>2024</span></div>
-
-          <article class="tl-entry tl-reveal">
+          <article class="tl-card" id="tl-c-3" data-pos="down">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2024 · 06</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">视频回忆</h3>
-              <p class="tl-desc">记忆节点也支持嵌入视频。</p>
-              <div class="tl-media tl-media--video">
-                <video controls preload="metadata" poster="https://picsum.photos/seed/vid1/640/400">
-                  <source src="your-video.mp4" type="video/mp4" />
-                  你的浏览器不支持视频播放。
-                </video>
-              </div>
+            <h3 class="tl-title">视频回忆</h3>
+            <p class="tl-desc">记忆节点也支持嵌入视频。</p>
+            <div class="tl-media tl-media--video">
+              <video controls preload="metadata" poster="https://picsum.photos/seed/vid1/640/400">
+                <source src="your-video.mp4" type="video/mp4" />
+              </video>
             </div>
           </article>
 
-          <!-- ── 2025 ── -->
-          <div class="tl-year tl-reveal"><span>2025</span></div>
-
-          <article class="tl-entry tl-reveal">
+          <article class="tl-card" id="tl-c-4" data-pos="up">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2025 · 01</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">新的篇章</h3>
-              <p class="tl-desc">继续记录你的故事。每一段代码，<br />每一次思考，都值得被铭记。</p>
-            </div>
+            <h3 class="tl-title">新的篇章</h3>
+            <p class="tl-desc">继续记录你的故事。每一段代码，每一次思考，都值得被铭记。</p>
           </article>
 
-          <!-- ── 2026 ── -->
-          <div class="tl-year tl-reveal"><span>2026</span></div>
-
-          <article class="tl-entry tl-reveal">
+          <article class="tl-card" id="tl-c-5" data-pos="down">
+            <button class="tl-card-close" aria-label="关闭">&times;</button>
             <time class="tl-time">2026 · 至今</time>
-            <div class="tl-dot"></div>
-            <div class="tl-card">
-              <h3 class="tl-title">故事仍在继续</h3>
-              <p class="tl-desc">To be continued…</p>
-            </div>
+            <h3 class="tl-title">故事仍在继续</h3>
+            <p class="tl-desc">To be continued…</p>
           </article>
-
-          <!--
-            添加新的记忆节点：复制下面的模板
-            <article class="tl-entry tl-reveal">
-              <time class="tl-time">YYYY · MM</time>
-              <div class="tl-dot"></div>
-              <div class="tl-card">
-                <h3 class="tl-title">标题</h3>
-                <p class="tl-desc">描述文字</p>
-                轮播图（可选）：
-                <div class="tl-media" data-carousel>
-                  <div class="tl-slides">
-                    <div class="tl-slide"><img src="图片路径" alt="" loading="lazy" /></div>
-                  </div>
-                  <button class="tl-arrow tl-arrow--prev" aria-label="上一张">&#8249;</button>
-                  <button class="tl-arrow tl-arrow--next" aria-label="下一张">&#8250;</button>
-                  <div class="tl-indicators"></div>
-                </div>
-                视频（可选）：
-                <div class="tl-media tl-media--video">
-                  <video controls preload="metadata" poster="封面图">
-                    <source src="视频.mp4" type="video/mp4" />
-                  </video>
-                </div>
-              </div>
-            </article>
-          -->
         </div>
       </div>
     </section>
