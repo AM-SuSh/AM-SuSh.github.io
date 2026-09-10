@@ -1,14 +1,8 @@
 # 课程笔记
 
-> 在代码与思考的交汇处，把课堂里的一知一解，慢慢誊写下来。
-
-欢迎来到我的课程笔记站。这里记录我在专业课里的逐章手记——从概念到实现，
-附上我自己的注解与复盘。所有内容**在线即可阅读**，无需下载。
-
-!!! tip "如何使用"
-    - 顶部切换不同课程，左侧目录定位章节
-    - 右上角 :material-magnify: 搜索任意关键词
-    - PDF 笔记会**内嵌显示**，浏览器直接翻阅
+<div class="notes-hero" markdown>
+**正在学习** · 2026 / SUMMER
+</div>
 
 ---
 
@@ -49,11 +43,3 @@
     [:octicons-arrow-right-24: 阅读](distributed/index.md)
 
 </div>
-
----
-
-## 关于这些笔记
-
-- :material-update: **持续更新**——随课程进度补充
-- :fontawesome-solid-pen-nib: **手写为主**——自己的理解与注解，而非教材搬运
-- :material-link-variant: **回到主页**——[am-sush.github.io](https://am-sush.github.io)

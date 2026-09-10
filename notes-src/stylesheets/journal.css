@@ -66,6 +66,25 @@ body,
   border: 1px solid #d8d2c4;
 }
 
+/* 嵌套无序列表：Material 默认会让所有 ul 都使用实心圆，
+   这里显式区分层级，便于阅读课程笔记中的树状提纲。 */
+.md-typeset ul {
+  list-style-type: disc;
+}
+
+.md-typeset ul ul {
+  list-style-type: circle;
+}
+
+.md-typeset ul ul ul {
+  list-style-type: square;
+}
+
+/* 第四级以后保持方块，避免层级继续增加后标记再次变回实心圆。 */
+.md-typeset ul ul ul ul {
+  list-style-type: square;
+}
+
 /* 搜索高亮色 */
 .md-search-result__teaser mark,
 [data-md-color-scheme="journal-paper"] mark {
@@ -108,4 +127,29 @@ body,
 .md-typeset .grid.cards > ul > li {
   border: 1px solid #d8d2c4;
   background: rgba(255, 255, 255, 0.35);
+}
+
+/* 可在 Markdown 中复用的自定义强调面板 */
+.md-typeset .note-panel {
+  margin: 1.2em 0;
+  padding: 1em 1.2em;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-left: 4px solid var(--md-accent-fg-color);
+  border-radius: 0.35rem;
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.md-typeset .note-panel--blue {
+  border-left-color: #2d4a5a;
+  background: rgba(45, 74, 90, 0.08);
+}
+
+.md-typeset .note-panel--red {
+  border-left-color: #9a3b2c;
+  background: rgba(154, 59, 44, 0.08);
+}
+
+.md-typeset .note-panel--gray {
+  border-left-color: #8a847a;
+  background: rgba(138, 132, 122, 0.12);
 }
