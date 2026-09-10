@@ -60,13 +60,7 @@ theme:
 # ── 导航（左侧栏：所有章节直接可见）──
 nav:
   - 首页: index.md
-  - 操作系统:
-      - 概览: os/index.md
-      - 进程与线程: os/process-thread.md
-      - CPU 调度: os/scheduling.md
-      - 内存管理: os/memory.md
-      - 并发与同步: os/concurrency.md
-      - 文件系统: os/filesystem.md
+  - 操作系统: os/os.md
   - 计算机网络:
       - 概览: networks/index.md
       - 物理层 / 数据链路层: networks/physical-link.md
@@ -84,7 +78,7 @@ nav:
       - 导图: distributed/mindmap.md
       - 课程总结: distributed/summary.md
   - 使用说明:
-      - 笔记管理手册: how-to.md
+      - Markdown 笔记编写与发布指南: editing-guide.md
   - 主页 ↩: https://am-sush.github.io
 
 # ── Markdown 扩展 ──
@@ -95,6 +89,10 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.inlinehilite      # 行内代码高亮
+  - pymdownx.keys              # 键盘按键（++ctrl+c++）
+  - pymdownx.mark              # 文本高亮（==重点==）
+  - pymdownx.tilde              # 下标（H~2~O）
+  - pymdownx.caret              # 上标（m^2^）
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:
