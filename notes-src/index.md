@@ -16,7 +16,7 @@
 
     进程与线程、调度、内存管理、并发同步、文件系统——从概念到 MiniMR 落地。
 
-    [:octicons-arrow-right-24: 阅读](os/index.md)
+    [:octicons-arrow-right-24: 阅读](os/os.md)
 
 -   :material-lan: **计算机网络**
 
