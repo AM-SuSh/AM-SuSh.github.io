@@ -2,66 +2,78 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://am-sush.github.io/notes/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/editing-guide/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/distributed/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/distributed/mindmap/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/distributed/summary/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/dsa/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/dsa/design/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/dsa/linear/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/dsa/sort-search/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/dsa/tree-graph/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/networks/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/networks/application-layer/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/networks/network-layer/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/networks/physical-link/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/networks/transport-layer/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
+    </url>
+    <url>
+         <loc>https://am-sush.github.io/notes/os/</loc>
+         <lastmod>2026-09-11</lastmod>
+    </url>
+    <url>
+         <loc>https://am-sush.github.io/notes/os/os-2/</loc>
+         <lastmod>2026-09-11</lastmod>
+    </url>
+    <url>
+         <loc>https://am-sush.github.io/notes/os/os-3/</loc>
+         <lastmod>2026-09-11</lastmod>
     </url>
     <url>
          <loc>https://am-sush.github.io/notes/os/os/</loc>
-         <lastmod>2026-09-10</lastmod>
+         <lastmod>2026-09-11</lastmod>
     </url>
 </urlset>
