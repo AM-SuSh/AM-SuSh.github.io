@@ -13,10 +13,10 @@
         <link rel="canonical" href="https://am-sush.github.io/notes/os/os/">
       
       
-        <link rel="prev" href="../..">
+        <link rel="prev" href="../">
       
       
-        <link rel="next" href="../../networks/">
+        <link rel="next" href="../os-2/">
       
       
         
@@ -27,7 +27,7 @@
     
     
       
-        <title>操作系统 - AM-SuSh · 课程笔记</title>
+        <title>虚拟化 - AM-SuSh · 课程笔记</title>
       
     
     
@@ -116,7 +116,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              操作系统
+              虚拟化
             
           </span>
         </div>
@@ -268,6 +268,81 @@
   
   
   
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    操作系统
+  
+
+    
+  </span>
+  
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    操作系统
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -283,7 +358,7 @@
   <span class="md-ellipsis">
     
   
-    操作系统
+    虚拟化
   
 
     
@@ -301,7 +376,7 @@
   <span class="md-ellipsis">
     
   
-    操作系统
+    虚拟化
   
 
     
@@ -368,6 +443,70 @@
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../os-2/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    并发
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../os-3/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    持久化
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -1495,7 +1634,7 @@
 <li>
 <p>优：支持动态分配；空间利用率高；可复用</p>
 </li>
-<li>劣：分配释放效率低（需遍历列表）；内碎片
+<li>劣：分配释放效率低（需遍历列表）(traverse)；内碎片
                   - 更好的实现</li>
 <li>分配<ul>
 <li>首次适配：列表中的第一个</li>
@@ -1503,7 +1642,7 @@
 <li>最差适配：找最大的分割它</li>
 </ul>
 </li>
-<li>释放：合并相邻空闲块
+<li>释放：合并相邻空闲块（Merge adjacent free blocks）
                   - 与OS交互</li>
 <li>OS将一大块内存交给进程来存储堆对象</li>
 <li>运行时库管理这个块</li>
@@ -1515,13 +1654,13 @@
 </ul>
 </li>
 <li>
-<p>静态重定位</p>
+<p>静态重定位（Static Relocation）</p>
 <ul>
 <li>加载程序时，将其重定位到分配的区域</li>
 <li>仔细调整代码和全局变量中的所有指针，并将栈指针设置为分配的栈</li>
 <li>只有一个地址空间，没有物理/虚拟分离</li>
 <li>问题<ul>
-<li>进程之间没有分离（没有完整性和保密性）</li>
+<li>进程之间没有分离（没有完整性和保密性）（integrity and confidentiality）</li>
 <li>碎片化，地址空间在程序运行时保持不变</li>
 <li>加载程序时必须调整程序（如跳转的目标根据地址在空间中的位置不同而不同）</li>
 </ul>
@@ -1529,11 +1668,11 @@
 </ul>
 </li>
 </ul>
-<p>操作系统如何为每个进程提供私有地址空间的幻觉？</p>
+<p><mark><strong>操作系统如何为每个进程提供私有地址空间的幻觉？</strong></mark></p>
 <ul>
 <li>
-<p>动态重定位</p>
-<p>硬件拦截每个内存访问，并动态透明地将程序的VA转换为PA。</p>
+<p>动态重定位（Dynamic Relocation）</p>
+<p>硬件拦截（intercept）每个内存访问，并动态透明地将程序的VA转换为PA。</p>
 <p>OS则是管理进程虚拟地址空间向物理地址块的转换基准信息。</p>
 <ul>
 <li>
@@ -1544,19 +1683,19 @@
 <p>简单MMU</p>
 <ul>
 <li>
-<p>基址寄存器： VA + 偏移量 = PA，偏移量存在特殊寄存器中，每个进程值不同。</p>
-<p>问题：进程之间不一定分离</p>
+<p>基址寄存器： VA + 偏移量（offset） = PA，偏移量存在特殊寄存器中，每个进程值不同。</p>
+<p><strong>问题：进程之间不一定分离</strong></p>
 </li>
 <li>
 <p>基址+边界：基址寄存器设置最小地址，边界寄存器设置地址空间大小/上限内存地址</p>
-<p>问题：所有内存必须连续分配，PA会浪费；进程间无法共享。堆、栈之间未使用的空间占据内存空间</p>
+<p><strong>问题：所有内存必须连续（contiguously）分配，PA会浪费；进程间无法共享。堆、栈之间未使用的空间占据内存空间</strong></p>
 </li>
 <li>
-<p><mark>分段</mark>：不使用单个基址/边界寄存器，而是每个内存区域有对应的一堆基址/边界寄存器：</p>
+<p><mark>分段</mark>（Segmentation）：不使用单个基址/边界寄存器，而是每个内存区域有对应的一堆基址/边界寄存器：</p>
 <p>代码段、数据段、栈段、额外段</p>
 <p>允许每个进程有多个连续内存区域，从VA映射到PA。</p>
 <ul>
-<li>分段问题<ul>
+<li><strong>分段问题</strong><ul>
 <li>空间：每个段必须完全由内存支持</li>
 <li>空间：物理内存区域必须是连续的（碎片化）</li>
 <li>ISA：指令明确或隐含编码目标段</li>
@@ -1572,10 +1711,10 @@
 </ul>
 </li>
 <li>
-<p>复杂MMU：分页</p>
-<p>目标：消除外部碎片化：根据需要增长和缩小段</p>
-<p>思想：将地址空间和物理内存分成页面，根据页面粒度分配内存，但仍出现内碎片（分配时舍入到页面大小）</p>
-<p><mark>页面是分割地址空间的最小单位。</mark> 具有12位页面表示地址的最低12位指定页面偏移量，页面大小为2^12字节（4KB）</p>
+<p>复杂MMU：分页（Paging）</p>
+<p>目标：消除（Eliminate）外部碎片化：根据需要增长和缩小段</p>
+<p>思想：将地址空间和物理内存分成页面，根据页面粒度（granularity）分配内存，但仍出现内碎片（分配时舍入到页面大小）</p>
+<p><mark><strong>页面是分割地址空间的最小单位。</strong></mark> 具有12位页面表示地址的最低12位指定页面偏移量，页面大小为2^12字节（4KB）</p>
 <ul>
 <li>
 <p>分页：地址转换</p>
@@ -1597,7 +1736,7 @@
 </ol>
 </li>
 <li><mark>页表：（每个进程一个）OS为每个进程保存的数据结构，为地址空间的每个虚拟页保存地址转换。</mark></li>
-<li>避免额外内存访问TLB（转换后备缓冲区/地址转换旁路缓存存储器）<ul>
+<li>避免额外内存访问TLB（转换后备缓冲区/地址转换旁路缓存存储器）(Translation Lookaside Buffer)<ul>
 <li>TLB：最近访问一部分页的页表被缓存，MMU转换时优先查找TLB，不命中再去查页表（存在内存中）硬件全权处理TLB未命中；切换到内核模式，遍历页表查找，更新TLB，返回用户再让进程重新运行。</li>
 </ul>
 </li>
@@ -1607,7 +1746,7 @@
 <ul>
 <li>优：节省内存空间；支持更大虚拟地址空间</li>
 <li>劣：地址转换变慢；TLB未命中代价更大
-                    - 交换：当主内存用尽时</li>
+                    - 交换(Swapping)：当主内存用尽时</li>
 </ul>
 </li>
 </ul>
@@ -1627,7 +1766,8 @@
 <p><strong>MMU在页面错误期间为什么切换到OS？</strong></p>
 <ul>
 <li>
-<p>MMU处理常见情况：页面路径有效，页面存在</p>
+<p>MMU处理常见情况：</p>
+<p>页面路径有效，页面存在</p>
 <p>页面遍历可以高度优化；</p>
 <p>OS和MMU对数据结构达成一致</p>
 </li>
@@ -1646,7 +1786,7 @@
 <li>最优替换算法：假设已知未来访问页面序列，最小化发生缺页故障数为目标替换。</li>
 <li>简单策略FIFO：先进先出原则</li>
 <li>简单策略随机替换</li>
-<li>LRU算法：局部性原理，换掉最近最少使用的页面</li>
+<li>LRU算法(Least Recently Used)：局部性原理，换掉最近最少使用的页面</li>
 </ul>
 </li>
 </ul>
@@ -1656,7 +1796,7 @@
 <li>程序的工作集：程序代码和数据的子集，这些代码和数据当前正在使用。这意味着工作集是一个随着程序的运行而<strong>随着时间变化</strong>的临时指标。大多数访问将被限制在少量地址上，表现出<strong>局部性</strong>。</li>
 <li>仿存的局部性：在进程运行的任何阶段，它都只访问它的页面中较小的一部分。</li>
 <li><strong>工作集</strong>：一个进程当前使用的页的集合。</li>
-<li><mark><strong>抖动</strong>：分配给进程的物理页面数太小，无法包含其工作集，频繁地在内存和外存间换页。</mark></li>
+<li><mark><strong>抖动</strong>(Thrashing)：分配给进程的物理页面数太小，无法包含其工作集，频繁地在内存和外存间换页。</mark></li>
 <li><mark><strong>工作集模型</strong>：页式存储管理系统跟踪进程的工作集，并保证在进程运行以前它的工作集就已经在内存中了，在进程运行之前预先转入页面也叫做<strong>预先调页</strong>。</mark></li>
 <li>缺页率算法：<ul>
 <li>缺页率：一秒钟内出现的缺页数（统计）</li>
